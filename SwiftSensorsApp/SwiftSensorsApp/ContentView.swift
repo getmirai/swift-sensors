@@ -140,7 +140,12 @@ struct ContentView: View {
             List {
                 Section(header: Text("Thermal Sensors")) {
                     ForEach(Array(zip(viewModel.thermalSensors.indices, viewModel.thermalSensors)), id: \.1.id) { index, sensor in
-                        NavigationLink(destination: SensorDetailView(sensorName: sensor.name)) {
+                        NavigationLink {
+                            // Use a stable identifier for the detail view
+                            SensorDetailView(sensorName: sensor.name)
+                                // Add an id to ensure SwiftUI treats this as a stable view
+                                .id(sensor.name)
+                        } label: {
                             HStack {
                                 Text(sensor.name)
                                 Spacer()

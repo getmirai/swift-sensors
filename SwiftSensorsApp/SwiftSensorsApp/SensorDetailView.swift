@@ -48,24 +48,26 @@ struct SensorDetailView: View {
     }
     
     var body: some View {
-        VStack {
-            // Current reading display
-            HStack(alignment: .bottom) {
-                Text(String(format: "%.1f", store.currentTemperature))
-                    .font(.system(size: 72, weight: .bold, design: .rounded))
-                Text("°C")
-                    .font(.title)
-                    .padding(.bottom, 8)
-            }
-            .padding()
-            
-            // Statistics display
-            HStack(spacing: 20) {
-                StatBox(title: "Min", value: String(format: "%.1f°C", store.minTemperature))
-                StatBox(title: "Avg", value: String(format: "%.1f°C", store.avgTemperature))
-                StatBox(title: "Max", value: String(format: "%.1f°C", store.maxTemperature))
-            }
-            .padding()
+        // Add a container to make this view stable
+        ZStack {
+            VStack {
+                // Current reading display
+                HStack(alignment: .bottom) {
+                    Text(String(format: "%.1f", store.currentTemperature))
+                        .font(.system(size: 72, weight: .bold, design: .rounded))
+                    Text("°C")
+                        .font(.title)
+                        .padding(.bottom, 8)
+                }
+                .padding()
+                
+                // Statistics display
+                HStack(spacing: 20) {
+                    StatBox(title: "Min", value: String(format: "%.1f°C", store.minTemperature))
+                    StatBox(title: "Avg", value: String(format: "%.1f°C", store.avgTemperature))
+                    StatBox(title: "Max", value: String(format: "%.1f°C", store.maxTemperature))
+                }
+                .padding()
             
             // Chart display
             Chart {
@@ -105,6 +107,9 @@ struct SensorDetailView: View {
             
             Spacer()
         }
+        }
+        // Make this view stable by adding a fixed ID
+        .id("detail-\(sensorName)")
         .navigationTitle(sensorName)
         .onAppear {
             updateReadings()
