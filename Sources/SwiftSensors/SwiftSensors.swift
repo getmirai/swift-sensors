@@ -1,7 +1,7 @@
 import Foundation
 
-/// The main class for accessing all sensor data
-public final class SwiftSensors: Sendable {
+/// The main actor for accessing all sensor data
+public actor SwiftSensors {
     /// Shared instance for easy access
     public static let shared = SwiftSensors()
     
@@ -25,95 +25,92 @@ public final class SwiftSensors: Sendable {
     
     /// Get all available thermal sensors
     /// - Returns: An array of thermal sensors
-    @MainActor
-    public func getThermalSensors() -> [ThermalSensor] {
-        return thermalSensorManager.getAllThermalSensors()
+    public func getThermalSensors() async -> [ThermalSensor] {
+        return await thermalSensorManager.getAllThermalSensors()
     }
     
     // MARK: - Memory Stats
     
     /// Get current memory statistics
     /// - Returns: Memory statistics
-    public func getMemoryStats() -> MemoryStats {
-        return systemStatsManager.getMemoryStats()
+    public func getMemoryStats() async -> MemoryStats {
+        return await systemStatsManager.getMemoryStats()
     }
     
     /// Get formatted memory usage string
     /// - Returns: A string describing memory usage
-    public func getFormattedMemoryUsage() -> String {
-        let stats = getMemoryStats()
+    public func getFormattedMemoryUsage() async -> String {
+        let stats = await getMemoryStats()
         let usedPercentage = Double(stats.totalUsedMemory) / Double(stats.totalMemory) * 100
-        return "\(formatter.formatPercentage(usedPercentage)) (\(formatter.formatBytes(stats.totalUsedMemory)) of \(formatter.formatBytes(stats.totalMemory)))"
+        return "\(await formatter.formatPercentage(usedPercentage)) (\(await formatter.formatBytes(stats.totalUsedMemory)) of \(await formatter.formatBytes(stats.totalMemory)))"
     }
     
     // MARK: - CPU Stats
     
     /// Get current CPU statistics
     /// - Returns: CPU statistics
-    public func getCPUStats() -> CPUStats {
-        return systemStatsManager.getCPUStats()
+    public func getCPUStats() async -> CPUStats {
+        return await systemStatsManager.getCPUStats()
     }
     
     /// Get formatted CPU usage string
     /// - Returns: A string describing CPU usage
-    public func getFormattedCPUUsage() -> String {
-        let stats = getCPUStats()
-        return formatter.formatPercentage(stats.totalUsage)
+    public func getFormattedCPUUsage() async -> String {
+        let stats = await getCPUStats()
+        return await formatter.formatPercentage(stats.totalUsage)
     }
     
     // MARK: - Disk Stats
     
     /// Get current disk statistics
     /// - Returns: Disk statistics
-    public func getDiskStats() -> DiskStats {
-        return systemStatsManager.getDiskStats()
+    public func getDiskStats() async -> DiskStats {
+        return await systemStatsManager.getDiskStats()
     }
     
     /// Get formatted disk usage string
     /// - Returns: A string describing disk usage
-    public func getFormattedDiskUsage() -> String {
-        let stats = getDiskStats()
+    public func getFormattedDiskUsage() async -> String {
+        let stats = await getDiskStats()
         let usedPercentage = Double(stats.usedSpace) / Double(stats.totalSpace) * 100
-        return "\(formatter.formatPercentage(usedPercentage)) (\(formatter.formatBytes(stats.usedSpace)) of \(formatter.formatBytes(stats.totalSpace)))"
+        return "\(await formatter.formatPercentage(usedPercentage)) (\(await formatter.formatBytes(stats.usedSpace)) of \(await formatter.formatBytes(stats.totalSpace)))"
     }
     
     // MARK: - System Info
     
     /// Get current thermal state
     /// - Returns: Thermal state of the device
-    public func getThermalState() -> ThermalState {
-        return systemStatsManager.getThermalState()
+    public func getThermalState() async -> ThermalState {
+        return await systemStatsManager.getThermalState()
     }
     
     /// Get system uptime
     /// - Returns: System uptime in seconds
-    public func getSystemUptime() -> TimeInterval {
-        return systemStatsManager.getSystemUptime()
+    public func getSystemUptime() async -> TimeInterval {
+        return await systemStatsManager.getSystemUptime()
     }
     
     /// Get formatted system uptime
     /// - Returns: A human-readable string of the system uptime
-    public func getFormattedUptime() -> String {
-        return systemStatsManager.getFormattedUptime()
+    public func getFormattedUptime() async -> String {
+        return await systemStatsManager.getFormattedUptime()
     }
     
     /// Get operating system version
     /// - Returns: OS version string
-    public func getOSVersion() -> String {
-        return systemStatsManager.getOSVersion()
+    public func getOSVersion() async -> String {
+        return await systemStatsManager.getOSVersion()
     }
     
     /// Get battery level
     /// - Returns: Battery level as a percentage (0-100)
-    @MainActor
-    public func getBatteryLevel() -> Float {
-        return systemStatsManager.getBatteryLevel()
+    public func getBatteryLevel() async -> Float {
+        return await systemStatsManager.getBatteryLevel()
     }
     
     /// Get device type
     /// - Returns: Device type string
-    @MainActor
-    public func getDeviceType() -> String {
-        return systemStatsManager.getDeviceType()
+    public func getDeviceType() async -> String {
+        return await systemStatsManager.getDeviceType()
     }
 }

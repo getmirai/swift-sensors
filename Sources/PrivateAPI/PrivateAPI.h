@@ -4,7 +4,6 @@
 #include <Foundation/Foundation.h>
 
 typedef struct __IOHIDEventSystemClient* IOHIDEventSystemClientRef;
-typedef struct __IOHIDServiceClient *IOHIDServiceClientRef;
 typedef struct __IOHIDEvent *IOHIDEventRef;
 typedef double IOHIDFloat;
 

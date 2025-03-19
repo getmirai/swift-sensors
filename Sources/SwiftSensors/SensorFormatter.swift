@@ -1,7 +1,7 @@
 import Foundation
 
-/// A utility class for formatting sensor values
-public final class SensorFormatter: Sendable {
+/// A utility actor for formatting sensor values
+public actor SensorFormatter {
     /// Shared instance for easy access
     public static let shared = SensorFormatter()
     

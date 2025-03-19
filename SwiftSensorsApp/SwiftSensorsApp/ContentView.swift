@@ -8,6 +8,13 @@ struct ContentView: View {
     @State private var cpuStats: CPUStats? = nil
     @State private var diskStats: DiskStats? = nil
     @State private var thermalState: ThermalState = .unknown
+    @State private var uptimeText: String = "Loading..."
+    
+    // Formatted display values
+    @State private var formattedTemperatures: [String] = []
+    @State private var formattedMemoryValues: [String] = []
+    @State private var formattedCPUValues: [String] = []
+    @State private var formattedDiskValues: [String] = []
     
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     let formatter = SensorFormatter.shared
@@ -16,12 +23,12 @@ struct ContentView: View {
         NavigationView {
             List {
                 Section(header: Text("Thermal Sensors")) {
-                    ForEach(thermalSensors) { sensor in
+                    ForEach(Array(zip(thermalSensors.indices, thermalSensors)), id: \.1.id) { index, sensor in
                         NavigationLink(destination: SensorDetailView(sensorName: sensor.name)) {
                             HStack {
                                 Text(sensor.name)
                                 Spacer()
-                                Text(formatter.formatTemperature(sensor.temperature))
+                                Text(index < formattedTemperatures.count ? formattedTemperatures[index] : "\(sensor.temperature) °C")
                             }
                         }
                     }
@@ -34,35 +41,35 @@ struct ContentView: View {
                 }
                 
                 Section(header: Text("Memory Information")) {
-                    if let stats = memoryStats {
+                    if memoryStats != nil, formattedMemoryValues.count >= 5 {
                         HStack {
                             Text("Total")
                             Spacer()
-                            Text(formatter.formatBytes(stats.totalMemory))
+                            Text(formattedMemoryValues[0])
                         }
                         
                         HStack {
                             Text("Free")
                             Spacer()
-                            Text(formatter.formatBytes(stats.freeMemory))
+                            Text(formattedMemoryValues[1])
                         }
                         
                         HStack {
                             Text("Active")
                             Spacer()
-                            Text(formatter.formatBytes(stats.activeMemory))
+                            Text(formattedMemoryValues[2])
                         }
                         
                         HStack {
                             Text("Wired")
                             Spacer()
-                            Text(formatter.formatBytes(stats.wiredMemory))
+                            Text(formattedMemoryValues[3])
                         }
                         
                         HStack {
                             Text("Used")
                             Spacer()
-                            Text(formatter.formatBytes(stats.totalUsedMemory))
+                            Text(formattedMemoryValues[4])
                         }
                     } else {
                         Text("Loading memory information...")
@@ -72,23 +79,23 @@ struct ContentView: View {
                 }
                 
                 Section(header: Text("CPU Information")) {
-                    if let stats = cpuStats {
+                    if let stats = cpuStats, formattedCPUValues.count >= 3 {
                         HStack {
                             Text("CPU Usage")
                             Spacer()
-                            Text(formatter.formatPercentage(stats.totalUsage))
+                            Text(formattedCPUValues[0])
                         }
                         
                         HStack {
                             Text("User")
                             Spacer()
-                            Text(formatter.formatPercentage(stats.userUsage))
+                            Text(formattedCPUValues[1])
                         }
                         
                         HStack {
                             Text("System")
                             Spacer()
-                            Text(formatter.formatPercentage(stats.systemUsage))
+                            Text(formattedCPUValues[2])
                         }
                         
                         HStack {
@@ -104,23 +111,23 @@ struct ContentView: View {
                 }
                 
                 Section(header: Text("Disk Information")) {
-                    if let stats = diskStats {
+                    if diskStats != nil, formattedDiskValues.count >= 3 {
                         HStack {
                             Text("Total")
                             Spacer()
-                            Text(formatter.formatBytes(stats.totalSpace))
+                            Text(formattedDiskValues[0])
                         }
                         
                         HStack {
                             Text("Used")
                             Spacer()
-                            Text(formatter.formatBytes(stats.usedSpace))
+                            Text(formattedDiskValues[1])
                         }
                         
                         HStack {
                             Text("Free")
                             Spacer()
-                            Text(formatter.formatBytes(stats.freeSpace))
+                            Text(formattedDiskValues[2])
                         }
                     } else {
                         Text("Loading disk information...")
@@ -140,7 +147,7 @@ struct ContentView: View {
                     HStack {
                         Text("Uptime")
                         Spacer()
-                        Text(SwiftSensors.shared.getFormattedUptime())
+                        Text(uptimeText)
                     }
                 }
                 
@@ -180,15 +187,64 @@ struct ContentView: View {
     private func updateSensorData() {
         let sensors = SwiftSensors.shared
         
-        // Update thermal sensors
-        thermalSensors = sensors.getThermalSensors()
-        
-        // Update memory, CPU, and disk stats
-        memoryStats = sensors.getMemoryStats()
-        cpuStats = sensors.getCPUStats()
-        diskStats = sensors.getDiskStats()
-        
-        // Update thermal state
-        thermalState = sensors.getThermalState()
+        // Use Task for async calls
+        Task {
+            // Update thermal sensors
+            thermalSensors = await sensors.getThermalSensors()
+            
+            // Format temperature values
+            formattedTemperatures = await withTaskGroup(of: String.self) { group in
+                for sensor in thermalSensors {
+                    group.addTask {
+                        await formatter.formatTemperature(sensor.temperature)
+                    }
+                }
+                
+                var results: [String] = []
+                for await result in group {
+                    results.append(result)
+                }
+                return results
+            }
+            
+            // Update memory, CPU, and disk stats
+            memoryStats = await sensors.getMemoryStats()
+            if let stats = memoryStats {
+                // Format memory values
+                formattedMemoryValues = await [
+                    formatter.formatBytes(stats.totalMemory),
+                    formatter.formatBytes(stats.freeMemory),
+                    formatter.formatBytes(stats.activeMemory),
+                    formatter.formatBytes(stats.wiredMemory),
+                    formatter.formatBytes(stats.totalUsedMemory)
+                ]
+            }
+            
+            cpuStats = await sensors.getCPUStats()
+            if let stats = cpuStats {
+                // Format CPU values
+                formattedCPUValues = await [
+                    formatter.formatPercentage(stats.totalUsage),
+                    formatter.formatPercentage(stats.userUsage),
+                    formatter.formatPercentage(stats.systemUsage)
+                ]
+            }
+            
+            diskStats = await sensors.getDiskStats()
+            if let stats = diskStats {
+                // Format disk values
+                formattedDiskValues = await [
+                    formatter.formatBytes(stats.totalSpace),
+                    formatter.formatBytes(stats.usedSpace),
+                    formatter.formatBytes(stats.freeSpace)
+                ]
+            }
+            
+            // Update thermal state
+            thermalState = await sensors.getThermalState()
+            
+            // Update uptime
+            uptimeText = await sensors.getFormattedUptime()
+        }
     }
 }

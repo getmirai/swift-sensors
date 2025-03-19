@@ -5,7 +5,7 @@ import UIKit
 import os
 
 /// A structure representing memory statistics
-public struct MemoryStats {
+public struct MemoryStats: Sendable {
     /// Total physical memory in bytes
     public let totalMemory: UInt64
     /// Free memory in bytes
@@ -25,7 +25,7 @@ public struct MemoryStats {
 }
 
 /// A structure representing CPU statistics
-public struct CPUStats {
+public struct CPUStats: Sendable {
     /// Total CPU usage as a percentage
     public let totalUsage: Double
     /// User CPU usage as a percentage
@@ -43,7 +43,7 @@ public struct CPUStats {
 }
 
 /// A structure representing disk space statistics
-public struct DiskStats {
+public struct DiskStats: Sendable {
     /// Total disk space in bytes
     public let totalSpace: UInt64
     /// Used disk space in bytes
@@ -53,7 +53,7 @@ public struct DiskStats {
 }
 
 /// An enumeration for thermal state
-public enum ThermalState: String {
+public enum ThermalState: String, Sendable {
     case nominal = "Nominal"
     case fair = "Fair"
     case serious = "Serious"
@@ -61,8 +61,8 @@ public enum ThermalState: String {
     case unknown = "Unknown"
 }
 
-/// A class to retrieve system statistics
-public final class SystemStatsManager: @unchecked Sendable {
+/// An actor to retrieve system statistics
+public actor SystemStatsManager {
     /// Shared instance for easy access
     public static let shared = SystemStatsManager()
     

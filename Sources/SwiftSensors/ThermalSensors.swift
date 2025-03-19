@@ -2,10 +2,13 @@
 @preconcurrency import CoreFoundation
 import PrivateAPI
 
-let temperatureQuery = getQueryFor(page: 0xff00, usage: 5)
-let kIOHIDEventTypeTemperature = Int64(15)
+private let temperatureQuery = query(page: 0xff00, usage: 5)
+private let kIOHIDEventTypeTemperature = Int64(15)
 
-func getQueryFor(page: Int32, usage: Int32) -> CFDictionary {
+private func query(
+    page: Int32,
+    usage: Int32
+) -> CFDictionary {
     [
         "PrimaryUsagePage": page,
         "PrimaryUsage": usage
@@ -48,8 +51,8 @@ extension HIDServiceClient {
     }
 }
 
-/// A class representing a thermal sensor
-public struct ThermalSensor: Identifiable {
+/// A struct representing a thermal sensor
+public struct ThermalSensor: Identifiable, Sendable {
     /// Unique identifier for the sensor
     public let id: String
     /// The name of the sensor
@@ -64,8 +67,8 @@ public struct ThermalSensor: Identifiable {
     }
 }
 
-/// A manager class for thermal sensors
-public final class ThermalSensorManager: Sendable {
+/// A manager actor for thermal sensors
+public actor ThermalSensorManager {
     /// Shared instance for easy access
     public static let shared = ThermalSensorManager()
     
@@ -73,34 +76,12 @@ public final class ThermalSensorManager: Sendable {
     private init() {}
     
     /// Get all available thermal sensors with current temperature readings
-    @MainActor
     public func getAllThermalSensors() -> [ThermalSensor] {
         let entries = getThermalEntries()
-        if entries.isEmpty {
-            print("No thermal entries found, falling back to mock data")
-            return createMockSensors()
-        }
-        
         let nameDict = createNameDictionary(of: entries)
         let temps = getTemperatures(from: nameDict)
-        
-        if temps.isEmpty {
-            print("No temperature data found, falling back to mock data")
-            return createMockSensors()
-        }
-        
         return temps.map { (name, temp) in
             ThermalSensor(name: name, temperature: temp)
         }
-    }
-    
-    /// Create mock sensor data for testing or when real data is unavailable
-    private func createMockSensors() -> [ThermalSensor] {
-        return [
-            ThermalSensor(name: "CPU", temperature: 35.0 + Double.random(in: -3...5)),
-            ThermalSensor(name: "GPU", temperature: 32.0 + Double.random(in: -2...7)),
-            ThermalSensor(name: "Battery", temperature: 30.0 + Double.random(in: -1...3)),
-            ThermalSensor(name: "Memory", temperature: 33.0 + Double.random(in: -2...4))
-        ]
     }
 }

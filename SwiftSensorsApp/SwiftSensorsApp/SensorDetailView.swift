@@ -89,24 +89,27 @@ struct SensorDetailView: View {
     }
     
     private func updateReadings() {
-        // Get current temperature for this sensor
-        let allSensors = SwiftSensors.shared.getThermalSensors()
-        guard let sensor = allSensors.first(where: { $0.name == sensorName }) else { return }
-        
-        // Add new reading
-        let newReading = TemperatureReading(timestamp: Date(), temperature: sensor.temperature)
-        readings.append(newReading)
-        
-        // Limit the number of readings to display (last 60 seconds)
-        if readings.count > 60 {
-            readings.removeFirst(readings.count - 60)
+        // Use Task for async calls
+        Task {
+            // Get current temperature for this sensor
+            let allSensors = await SwiftSensors.shared.getThermalSensors()
+            guard let sensor = allSensors.first(where: { $0.name == sensorName }) else { return }
+            
+            // Add new reading
+            let newReading = TemperatureReading(timestamp: Date(), temperature: sensor.temperature)
+            readings.append(newReading)
+            
+            // Limit the number of readings to display (last 60 seconds)
+            if readings.count > 60 {
+                readings.removeFirst(readings.count - 60)
+            }
+            
+            // Update statistics
+            currentTemperature = sensor.temperature
+            minTemperature = readings.map { $0.temperature }.min() ?? 0
+            maxTemperature = readings.map { $0.temperature }.max() ?? 0
+            avgTemperature = readings.map { $0.temperature }.reduce(0, +) / Double(readings.count)
         }
-        
-        // Update statistics
-        currentTemperature = sensor.temperature
-        minTemperature = readings.map { $0.temperature }.min() ?? 0
-        maxTemperature = readings.map { $0.temperature }.max() ?? 0
-        avgTemperature = readings.map { $0.temperature }.reduce(0, +) / Double(readings.count)
     }
 }
 
