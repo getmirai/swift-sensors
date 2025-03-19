@@ -91,11 +91,14 @@ struct SensorDetailView: View {
     private func updateReadings() {
         // Use Task for async calls
         Task {
-            // Get current temperature for this sensor
-            let allSensors = await SwiftSensors.shared.getThermalSensors()
+            // Get sensor from shared view model
+            let viewModel = SensorsViewModel.shared
             
-            // Find our sensor by name
-            guard let sensor = allSensors.first(where: { $0.name == sensorName }) else { 
+            // Ensure view model has updated data
+            viewModel.updateIfNeeded()
+            
+            // Find our sensor by name - this will use the cached data
+            guard let sensor = viewModel.thermalSensors.first(where: { $0.name == sensorName }) else { 
                 print("Sensor not found: \(sensorName)")
                 return 
             }

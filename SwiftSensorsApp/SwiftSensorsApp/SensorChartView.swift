@@ -100,7 +100,14 @@ struct SensorChartView: View {
     private func updateSensorData() {
         // Use Task for async calls
         Task {
-            let sensors = await SwiftSensors.shared.getThermalSensors()
+            // Get shared view model
+            let viewModel = SensorsViewModel.shared
+            
+            // Ensure view model has updated data
+            viewModel.updateIfNeeded()
+            
+            // Use cached sensors from the view model
+            let sensors = viewModel.thermalSensors
             let now = Date()
             
             // Update UI on the main thread

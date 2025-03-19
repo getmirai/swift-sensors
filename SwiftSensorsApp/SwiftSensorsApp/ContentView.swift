@@ -3,231 +3,45 @@ import SwiftSensors
 import Charts
 
 @available(iOS 16.0, *)
-struct ContentView: View {
-    @State private var thermalSensors: [ThermalSensor] = []
-    @State private var voltageSensors: [VoltageSensor] = []
-    @State private var currentSensors: [CurrentSensor] = []
-    @State private var memoryStats: MemoryStats? = nil
-    @State private var cpuStats: CPUStats? = nil
-    @State private var diskStats: DiskStats? = nil
-    @State private var thermalState: ThermalState = .unknown
-    @State private var uptimeText: String = "Loading..."
+class SensorsViewModel: ObservableObject {
+    @Published var thermalSensors: [ThermalSensor] = []
+    @Published var voltageSensors: [VoltageSensor] = []
+    @Published var currentSensors: [CurrentSensor] = []
+    @Published var memoryStats: MemoryStats? = nil
+    @Published var cpuStats: CPUStats? = nil
+    @Published var diskStats: DiskStats? = nil
+    @Published var thermalState: ThermalState = .unknown
+    @Published var uptimeText: String = "Loading..."
     
     // Formatted display values
-    @State private var formattedTemperatures: [String] = []
-    @State private var formattedVoltages: [String] = []
-    @State private var formattedCurrents: [String] = []
-    @State private var formattedMemoryValues: [String] = []
-    @State private var formattedCPUValues: [String] = []
-    @State private var formattedDiskValues: [String] = []
+    @Published var formattedTemperatures: [String] = []
+    @Published var formattedVoltages: [String] = []
+    @Published var formattedCurrents: [String] = []
+    @Published var formattedMemoryValues: [String] = []
+    @Published var formattedCPUValues: [String] = []
+    @Published var formattedDiskValues: [String] = []
     
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    // Cache to ensure sensor readings persist across UI updates
+    private var lastUpdateTime = Date.distantPast
+    private let updateInterval: TimeInterval = 1.0
+    
     let formatter = SensorFormatter.shared
     
-    var body: some View {
-        NavigationView {
-            List {
-                Section(header: Text("Thermal Sensors")) {
-                    ForEach(Array(zip(thermalSensors.indices, thermalSensors)), id: \.1.id) { index, sensor in
-                        NavigationLink(destination: SensorDetailView(sensorName: sensor.name)) {
-                            HStack {
-                                Text(sensor.name)
-                                Spacer()
-                                Text(index < formattedTemperatures.count ? formattedTemperatures[index] : "\(sensor.temperature) °C")
-                            }
-                        }
-                    }
-                    
-                    if thermalSensors.isEmpty {
-                        Text("No thermal sensors found")
-                            .foregroundColor(.gray)
-                            .italic()
-                    }
-                }
-                
-                Section(header: Text("Memory Information")) {
-                    if memoryStats != nil, formattedMemoryValues.count >= 5 {
-                        HStack {
-                            Text("Total")
-                            Spacer()
-                            Text(formattedMemoryValues[0])
-                        }
-                        
-                        HStack {
-                            Text("Free")
-                            Spacer()
-                            Text(formattedMemoryValues[1])
-                        }
-                        
-                        HStack {
-                            Text("Active")
-                            Spacer()
-                            Text(formattedMemoryValues[2])
-                        }
-                        
-                        HStack {
-                            Text("Wired")
-                            Spacer()
-                            Text(formattedMemoryValues[3])
-                        }
-                        
-                        HStack {
-                            Text("Used")
-                            Spacer()
-                            Text(formattedMemoryValues[4])
-                        }
-                    } else {
-                        Text("Loading memory information...")
-                            .foregroundColor(.gray)
-                            .italic()
-                    }
-                }
-                
-                Section(header: Text("CPU Information")) {
-                    if let stats = cpuStats, formattedCPUValues.count >= 3 {
-                        HStack {
-                            Text("CPU Usage")
-                            Spacer()
-                            Text(formattedCPUValues[0])
-                        }
-                        
-                        HStack {
-                            Text("User")
-                            Spacer()
-                            Text(formattedCPUValues[1])
-                        }
-                        
-                        HStack {
-                            Text("System")
-                            Spacer()
-                            Text(formattedCPUValues[2])
-                        }
-                        
-                        HStack {
-                            Text("Active Processors")
-                            Spacer()
-                            Text("\(stats.activeProcessors) / \(stats.totalProcessors)")
-                        }
-                    } else {
-                        Text("Loading CPU information...")
-                            .foregroundColor(.gray)
-                            .italic()
-                    }
-                }
-                
-                Section(header: Text("Disk Information")) {
-                    if diskStats != nil, formattedDiskValues.count >= 3 {
-                        HStack {
-                            Text("Total")
-                            Spacer()
-                            Text(formattedDiskValues[0])
-                        }
-                        
-                        HStack {
-                            Text("Used")
-                            Spacer()
-                            Text(formattedDiskValues[1])
-                        }
-                        
-                        HStack {
-                            Text("Free")
-                            Spacer()
-                            Text(formattedDiskValues[2])
-                        }
-                    } else {
-                        Text("Loading disk information...")
-                            .foregroundColor(.gray)
-                            .italic()
-                    }
-                }
-                
-                Section(header: Text("System")) {
-                    HStack {
-                        Text("Thermal State")
-                        Spacer()
-                        Text(thermalState.rawValue)
-                            .foregroundColor(thermalStateColor(thermalState))
-                    }
-                    
-                    HStack {
-                        Text("Uptime")
-                        Spacer()
-                        Text(uptimeText)
-                    }
-                }
-                
-                Section(header: Text("Voltage Sensors")) {
-                    ForEach(Array(zip(voltageSensors.indices, voltageSensors)), id: \.1.id) { index, sensor in
-                        HStack {
-                            Text(sensor.name)
-                            Spacer()
-                            Text(index < formattedVoltages.count ? formattedVoltages[index] : "\(sensor.voltage) V")
-                        }
-                    }
-                    
-                    if voltageSensors.isEmpty {
-                        Text("No voltage sensors found")
-                            .foregroundColor(.gray)
-                            .italic()
-                    }
-                }
-                
-                Section(header: Text("Current Sensors")) {
-                    ForEach(Array(zip(currentSensors.indices, currentSensors)), id: \.1.id) { index, sensor in
-                        HStack {
-                            Text(sensor.name)
-                            Spacer()
-                            Text(index < formattedCurrents.count ? formattedCurrents[index] : "\(sensor.current) A")
-                        }
-                    }
-                    
-                    if currentSensors.isEmpty {
-                        Text("No current sensors found")
-                            .foregroundColor(.gray)
-                            .italic()
-                    }
-                }
-                
-                Section {
-                    NavigationLink(destination: SensorChartView()) {
-                        Text("View Temperature Charts")
-                            .font(.headline)
-                            .foregroundColor(.blue)
-                    }
-                    
-                    NavigationLink(destination: Text("Power Charts Coming Soon")) {
-                        Text("View Power Charts")
-                            .font(.headline)
-                            .foregroundColor(.blue)
-                    }
-                }
-            }
-            .navigationTitle("SwiftSensors")
-            .onAppear {
-                updateSensorData()
-            }
-            .onReceive(timer) { _ in
-                updateSensorData()
-            }
+    static let shared = SensorsViewModel()
+    
+    private init() {
+        // Initial data load
+        updateSensorData()
+    }
+    
+    func updateIfNeeded() {
+        let now = Date()
+        if now.timeIntervalSince(lastUpdateTime) > updateInterval {
+            updateSensorData()
         }
     }
     
-    private func thermalStateColor(_ state: ThermalState) -> Color {
-        switch state {
-        case .nominal:
-            return .green
-        case .fair:
-            return .yellow
-        case .serious:
-            return .orange
-        case .critical:
-            return .red
-        case .unknown:
-            return .gray
-        }
-    }
-    
-    private func updateSensorData() {
+    func updateSensorData() {
         let sensors = SwiftSensors.shared
         
         // Use Task for async calls
@@ -307,7 +121,224 @@ struct ContentView: View {
                 formattedMemoryValues = tempFormattedMemoryValues
                 formattedCPUValues = tempFormattedCPUValues
                 formattedDiskValues = tempFormattedDiskValues
+                
+                // Update timestamp
+                lastUpdateTime = Date()
             }
         }
+    }
+}
+
+@available(iOS 16.0, *)
+struct ContentView: View {
+    @StateObject private var viewModel = SensorsViewModel.shared
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section(header: Text("Thermal Sensors")) {
+                    ForEach(Array(zip(viewModel.thermalSensors.indices, viewModel.thermalSensors)), id: \.1.id) { index, sensor in
+                        NavigationLink(destination: SensorDetailView(sensorName: sensor.name)) {
+                            HStack {
+                                Text(sensor.name)
+                                Spacer()
+                                Text(index < viewModel.formattedTemperatures.count ? viewModel.formattedTemperatures[index] : "\(sensor.temperature) °C")
+                            }
+                        }
+                    }
+                    
+                    if viewModel.thermalSensors.isEmpty {
+                        Text("No thermal sensors found")
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                }
+                
+                Section(header: Text("Memory Information")) {
+                    if viewModel.memoryStats != nil, viewModel.formattedMemoryValues.count >= 5 {
+                        HStack {
+                            Text("Total")
+                            Spacer()
+                            Text(viewModel.formattedMemoryValues[0])
+                        }
+                        
+                        HStack {
+                            Text("Free")
+                            Spacer()
+                            Text(viewModel.formattedMemoryValues[1])
+                        }
+                        
+                        HStack {
+                            Text("Active")
+                            Spacer()
+                            Text(viewModel.formattedMemoryValues[2])
+                        }
+                        
+                        HStack {
+                            Text("Wired")
+                            Spacer()
+                            Text(viewModel.formattedMemoryValues[3])
+                        }
+                        
+                        HStack {
+                            Text("Used")
+                            Spacer()
+                            Text(viewModel.formattedMemoryValues[4])
+                        }
+                    } else {
+                        Text("Loading memory information...")
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                }
+                
+                Section(header: Text("CPU Information")) {
+                    if let stats = viewModel.cpuStats, viewModel.formattedCPUValues.count >= 3 {
+                        HStack {
+                            Text("CPU Usage")
+                            Spacer()
+                            Text(viewModel.formattedCPUValues[0])
+                        }
+                        
+                        HStack {
+                            Text("User")
+                            Spacer()
+                            Text(viewModel.formattedCPUValues[1])
+                        }
+                        
+                        HStack {
+                            Text("System")
+                            Spacer()
+                            Text(viewModel.formattedCPUValues[2])
+                        }
+                        
+                        HStack {
+                            Text("Active Processors")
+                            Spacer()
+                            Text("\(stats.activeProcessors) / \(stats.totalProcessors)")
+                        }
+                    } else {
+                        Text("Loading CPU information...")
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                }
+                
+                Section(header: Text("Disk Information")) {
+                    if viewModel.diskStats != nil, viewModel.formattedDiskValues.count >= 3 {
+                        HStack {
+                            Text("Total")
+                            Spacer()
+                            Text(viewModel.formattedDiskValues[0])
+                        }
+                        
+                        HStack {
+                            Text("Used")
+                            Spacer()
+                            Text(viewModel.formattedDiskValues[1])
+                        }
+                        
+                        HStack {
+                            Text("Free")
+                            Spacer()
+                            Text(viewModel.formattedDiskValues[2])
+                        }
+                    } else {
+                        Text("Loading disk information...")
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                }
+                
+                Section(header: Text("System")) {
+                    HStack {
+                        Text("Thermal State")
+                        Spacer()
+                        Text(viewModel.thermalState.rawValue)
+                            .foregroundColor(thermalStateColor(viewModel.thermalState))
+                    }
+                    
+                    HStack {
+                        Text("Uptime")
+                        Spacer()
+                        Text(viewModel.uptimeText)
+                    }
+                }
+                
+                Section(header: Text("Voltage Sensors")) {
+                    ForEach(Array(zip(viewModel.voltageSensors.indices, viewModel.voltageSensors)), id: \.1.id) { index, sensor in
+                        HStack {
+                            Text(sensor.name)
+                            Spacer()
+                            Text(index < viewModel.formattedVoltages.count ? viewModel.formattedVoltages[index] : "\(sensor.voltage) V")
+                        }
+                    }
+                    
+                    if viewModel.voltageSensors.isEmpty {
+                        Text("No voltage sensors found")
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                }
+                
+                Section(header: Text("Current Sensors")) {
+                    ForEach(Array(zip(viewModel.currentSensors.indices, viewModel.currentSensors)), id: \.1.id) { index, sensor in
+                        HStack {
+                            Text(sensor.name)
+                            Spacer()
+                            Text(index < viewModel.formattedCurrents.count ? viewModel.formattedCurrents[index] : "\(sensor.current) A")
+                        }
+                    }
+                    
+                    if viewModel.currentSensors.isEmpty {
+                        Text("No current sensors found")
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                }
+                
+                Section {
+                    NavigationLink(destination: SensorChartView()) {
+                        Text("View Temperature Charts")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                    }
+                    
+                    NavigationLink(destination: Text("Power Charts Coming Soon")) {
+                        Text("View Power Charts")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                    }
+                }
+            }
+            .navigationTitle("SwiftSensors")
+            .onAppear {
+                viewModel.updateIfNeeded()
+            }
+            .onReceive(timer) { _ in
+                viewModel.updateIfNeeded()
+            }
+        }
+    }
+    
+    private func thermalStateColor(_ state: ThermalState) -> Color {
+        switch state {
+        case .nominal:
+            return .green
+        case .fair:
+            return .yellow
+        case .serious:
+            return .orange
+        case .critical:
+            return .red
+        case .unknown:
+            return .gray
+        }
+    }
+    
+    // Deprecated method - use viewModel.updateIfNeeded() instead
+    private func updateSensorData() {
+        viewModel.updateIfNeeded()
     }
 }
