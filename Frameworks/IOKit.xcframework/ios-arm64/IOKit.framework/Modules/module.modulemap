@@ -1,5 +1,0 @@
-framework module IOKit {
-  umbrella header "IOKit.h"
-  export *
-  module * { export * }
-}

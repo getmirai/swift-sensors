@@ -8,8 +8,7 @@ typedef struct __IOHIDServiceClient *IOHIDServiceClientRef;
 typedef struct __IOHIDEvent *IOHIDEventRef;
 typedef double IOHIDFloat;
 
-@interface HIDServiceClient : NSObject
-{
+@interface HIDServiceClient: NSObject {
     struct {
         struct __IOHIDEventSystemClient *system;
         void *serviceID;
