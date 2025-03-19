@@ -2,67 +2,14 @@
 @preconcurrency import CoreFoundation
 import PrivateAPI
 
-private let voltageQuery = query(page: kHIDPage_AppleVendorPowerSensor, usage: kHIDUsage_AppleVendorPowerSensor_Voltage)
-private let currentQuery = query(page: kHIDPage_AppleVendorPowerSensor, usage: kHIDUsage_AppleVendorPowerSensor_Current)
-private let kIOHIDEventTypePower = Int64(25)
-
-private func eventFieldBase(_ type: Int32) -> Int32 {
-    return type << 16
-}
-
-private func query(
-    page: Int32,
-    usage: Int32
-) -> CFDictionary {
-    [
-        "PrimaryUsagePage": page,
-        "PrimaryUsage": usage
-    ] as CFDictionary
-}
-
-func getVoltageEntries() -> [HIDServiceClient] {
-    let system = IOHIDEventSystemClientCreate(kCFAllocatorDefault)
-    IOHIDEventSystemClientSetMatching(system, voltageQuery)
-    let matchingServices = IOHIDEventSystemClientCopyServices(system)
-    
-    let services = matchingServices?.takeRetainedValue() as? Array<HIDServiceClient>
-    return services ?? []
-}
-
-func getCurrentEntries() -> [HIDServiceClient] {
-    let system = IOHIDEventSystemClientCreate(kCFAllocatorDefault)
-    IOHIDEventSystemClientSetMatching(system, currentQuery)
-    let matchingServices = IOHIDEventSystemClientCopyServices(system)
-    
-    let services = matchingServices?.takeRetainedValue() as? Array<HIDServiceClient>
-    return services ?? []
-}
-
-func createPowerNameDictionary(of entries: [HIDServiceClient]) -> [String: HIDServiceClient] {
-    let keyValuePairs = entries.compactMap { client -> (String, HIDServiceClient)? in
-        guard let product = client.product else { return nil }
-        guard client.powerValue != nil else { return nil }
-        return (product, client)
-    }
-    return Dictionary(keyValuePairs) { left, right in left }
-}
-
-func getPowerValues(from dictionary: [String: HIDServiceClient]) -> [(String, Double)] {
-    dictionary.map { ($0, $1.powerValue!) }
-}
-
-extension HIDServiceClient {
-    var powerValue: Double? {
-        if let event = IOHIDServiceClientCopyEvent(self, Int64(kIOHIDEventTypePower), 0, 0) {
-            return IOHIDEventGetFloatValue(event, eventFieldBase(Int32(kIOHIDEventTypePower)))
-        } else {
-            return nil
-        }
-    }
+/// An enum representing a power sensor type
+public enum PowerSensorType: Sendable {
+    case voltage
+    case current
 }
 
 /// A struct representing a voltage sensor
-public struct VoltageSensor: Identifiable, Sendable {
+public struct VoltageSensor: BaseSensor {
     /// Unique identifier for the sensor
     public let id: String
     /// The name of the sensor
@@ -78,7 +25,7 @@ public struct VoltageSensor: Identifiable, Sendable {
 }
 
 /// A struct representing a current sensor
-public struct CurrentSensor: Identifiable, Sendable {
+public struct CurrentSensor: BaseSensor {
     /// Unique identifier for the sensor
     public let id: String
     /// The name of the sensor
@@ -93,19 +40,105 @@ public struct CurrentSensor: Identifiable, Sendable {
     }
 }
 
+/// A struct for representing any power sensor
+public struct PowerSensor: BaseSensor {
+    /// Unique identifier for the sensor
+    public let id: String
+    /// The name of the sensor
+    public let name: String
+    /// The sensor type (voltage or current)
+    public let type: PowerSensorType
+    /// The sensor value
+    public let value: Double
+    
+    /// Convenience property to get voltage (if this is a voltage sensor)
+    public var voltage: Double? {
+        type == .voltage ? value : nil
+    }
+    
+    /// Convenience property to get current (if this is a current sensor)
+    public var current: Double? {
+        type == .current ? value : nil
+    }
+    
+    init(name: String, type: PowerSensorType, value: Double) {
+        self.id = UUID().uuidString
+        self.name = name
+        self.type = type
+        self.value = value
+    }
+}
+
 /// A manager actor for power sensors (voltage and current)
-public actor PowerSensorManager {
+public actor PowerSensorManager: SensorManager {
+    public typealias SensorType = PowerSensor
+    
     /// Shared instance for easy access
     public static let shared = PowerSensorManager()
+    
+    /// Event type for power values
+    private let eventType = Int64(kIOHIDEventTypePower)
+    
+    /// Queries for voltage and current sensors
+    private let voltageQuery = SensorUtils.query(
+        page: kHIDPage_AppleVendorPowerSensor, 
+        usage: kHIDUsage_AppleVendorPowerSensor_Voltage
+    )
+    
+    private let currentQuery = SensorUtils.query(
+        page: kHIDPage_AppleVendorPowerSensor, 
+        usage: kHIDUsage_AppleVendorPowerSensor_Current
+    )
     
     /// Private initializer for singleton pattern
     private init() {}
     
+    /// Get all available power sensors (both voltage and current)
+    public func getAllSensors() async -> [PowerSensor] {
+        let voltageSensors = await getSpecificSensors(
+            query: voltageQuery, 
+            type: .voltage
+        )
+        
+        let currentSensors = await getSpecificSensors(
+            query: currentQuery, 
+            type: .current
+        )
+        
+        // Combine both types and sort by name
+        return (voltageSensors + currentSensors).sorted { $0.name < $1.name }
+    }
+    
+    /// Helper method to get sensors of a specific type
+    private func getSpecificSensors(query: CFDictionary, type: PowerSensorType) async -> [PowerSensor] {
+        let entries = SensorUtils.getEntries(matching: query)
+        
+        let nameDict = SensorUtils.createNameDictionary(of: entries) { client in
+            client.getValue(forEventType: self.eventType, fieldBase: Int32(kIOHIDEventTypePower)) != nil
+        }
+        
+        let values = SensorUtils.getSensorValues(from: nameDict) { client in
+            client.getValue(forEventType: self.eventType, fieldBase: Int32(kIOHIDEventTypePower))
+        }
+        
+        return values.map { (name, value) in
+            PowerSensor(name: name, type: type, value: value)
+        }
+    }
+    
+    // Legacy methods for backward compatibility
+    
     /// Get all available voltage sensors with current voltage readings
-    public func getAllVoltageSensors() -> [VoltageSensor] {
-        let entries = getVoltageEntries()
-        let nameDict = createPowerNameDictionary(of: entries)
-        let voltages = getPowerValues(from: nameDict)
+    public func getAllVoltageSensors() async -> [VoltageSensor] {
+        let entries = SensorUtils.getEntries(matching: voltageQuery)
+        
+        let nameDict = SensorUtils.createNameDictionary(of: entries) { client in
+            client.getValue(forEventType: self.eventType, fieldBase: Int32(kIOHIDEventTypePower)) != nil
+        }
+        
+        let voltages = SensorUtils.getSensorValues(from: nameDict) { client in
+            client.getValue(forEventType: self.eventType, fieldBase: Int32(kIOHIDEventTypePower))
+        }
         
         let sensors = voltages.map { (name, voltage) in
             VoltageSensor(name: name, voltage: voltage)
@@ -114,10 +147,16 @@ public actor PowerSensorManager {
     }
     
     /// Get all available current sensors with current amperage readings
-    public func getAllCurrentSensors() -> [CurrentSensor] {
-        let entries = getCurrentEntries()
-        let nameDict = createPowerNameDictionary(of: entries)
-        let currents = getPowerValues(from: nameDict)
+    public func getAllCurrentSensors() async -> [CurrentSensor] {
+        let entries = SensorUtils.getEntries(matching: currentQuery)
+        
+        let nameDict = SensorUtils.createNameDictionary(of: entries) { client in
+            client.getValue(forEventType: self.eventType, fieldBase: Int32(kIOHIDEventTypePower)) != nil
+        }
+        
+        let currents = SensorUtils.getSensorValues(from: nameDict) { client in
+            client.getValue(forEventType: self.eventType, fieldBase: Int32(kIOHIDEventTypePower))
+        }
         
         let sensors = currents.map { (name, current) in
             CurrentSensor(name: name, current: current)
