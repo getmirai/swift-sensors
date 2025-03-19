@@ -129,22 +129,29 @@ import Charts
     }
 }
 
+// Define a struct for navigation destination
+enum NavigationDestination: Hashable {
+    case sensorDetail(sensorName: String)
+    case sensorChart
+    case powerChart
+}
+
 @available(iOS 16.0, *)
 struct ContentView: View {
     // With @Observable, we no longer need @StateObject
     private var viewModel = SensorsViewModel.shared
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
+    // Navigation path for controlling navigation stack
+    @State private var navigationPath = NavigationPath()
+    
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $navigationPath) {
             List {
                 Section(header: Text("Thermal Sensors")) {
                     ForEach(Array(zip(viewModel.thermalSensors.indices, viewModel.thermalSensors)), id: \.1.id) { index, sensor in
-                        NavigationLink {
-                            // Use a stable identifier for the detail view
-                            SensorDetailView(sensorName: sensor.name)
-                                // Add an id to ensure SwiftUI treats this as a stable view
-                                .id(sensor.name)
+                        Button {
+                            navigationPath.append(NavigationDestination.sensorDetail(sensorName: sensor.name))
                         } label: {
                             HStack {
                                 Text(sensor.name)
@@ -152,6 +159,7 @@ struct ContentView: View {
                                 Text(index < viewModel.formattedTemperatures.count ? viewModel.formattedTemperatures[index] : "\(sensor.temperature) °C")
                             }
                         }
+                        .foregroundColor(.primary)
                     }
                     
                     if viewModel.thermalSensors.isEmpty {
@@ -305,13 +313,17 @@ struct ContentView: View {
                 }
                 
                 Section {
-                    NavigationLink(destination: SensorChartView()) {
+                    Button {
+                        navigationPath.append(NavigationDestination.sensorChart)
+                    } label: {
                         Text("View Temperature Charts")
                             .font(.headline)
                             .foregroundColor(.blue)
                     }
                     
-                    NavigationLink(destination: Text("Power Charts Coming Soon")) {
+                    Button {
+                        navigationPath.append(NavigationDestination.powerChart)
+                    } label: {
                         Text("View Power Charts")
                             .font(.headline)
                             .foregroundColor(.blue)
@@ -319,6 +331,16 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("SwiftSensors")
+            .navigationDestination(for: NavigationDestination.self) { destination in
+                switch destination {
+                case .sensorDetail(let sensorName):
+                    SensorDetailView(sensorName: sensorName)
+                case .sensorChart:
+                    SensorChartView()
+                case .powerChart:
+                    Text("Power Charts Coming Soon")
+                }
+            }
             .onAppear {
                 viewModel.updateIfNeeded()
             }
