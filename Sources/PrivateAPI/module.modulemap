@@ -1,0 +1,4 @@
+module PrivateAPI {
+    umbrella header "PrivateAPI.h"
+    export *
+}
