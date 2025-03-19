@@ -4,7 +4,9 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 # Set up variables
 TEMP_DIR="$(mktemp -d)"
-FRAMEWORKS_DIR="$(pwd)/Frameworks"
+SCRIPT_DIR="$(dirname "$0")"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+FRAMEWORKS_DIR="$PROJECT_DIR/Frameworks"
 mkdir -p "$FRAMEWORKS_DIR"
 OUTPUT_DIR="$FRAMEWORKS_DIR/IOKit.xcframework"
 
