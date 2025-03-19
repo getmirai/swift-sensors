@@ -93,22 +93,30 @@ struct SensorDetailView: View {
         Task {
             // Get current temperature for this sensor
             let allSensors = await SwiftSensors.shared.getThermalSensors()
-            guard let sensor = allSensors.first(where: { $0.name == sensorName }) else { return }
             
-            // Add new reading
-            let newReading = TemperatureReading(timestamp: Date(), temperature: sensor.temperature)
-            readings.append(newReading)
-            
-            // Limit the number of readings to display (last 60 seconds)
-            if readings.count > 60 {
-                readings.removeFirst(readings.count - 60)
+            // Find our sensor by name
+            guard let sensor = allSensors.first(where: { $0.name == sensorName }) else { 
+                print("Sensor not found: \(sensorName)")
+                return 
             }
             
-            // Update statistics
-            currentTemperature = sensor.temperature
-            minTemperature = readings.map { $0.temperature }.min() ?? 0
-            maxTemperature = readings.map { $0.temperature }.max() ?? 0
-            avgTemperature = readings.map { $0.temperature }.reduce(0, +) / Double(readings.count)
+            // Update the state on the main thread
+            await MainActor.run {
+                // Add new reading
+                let newReading = TemperatureReading(timestamp: Date(), temperature: sensor.temperature)
+                readings.append(newReading)
+                
+                // Limit the number of readings to display (last 60 seconds)
+                if readings.count > 60 {
+                    readings.removeFirst(readings.count - 60)
+                }
+                
+                // Update statistics
+                currentTemperature = sensor.temperature
+                minTemperature = readings.map { $0.temperature }.min() ?? 0
+                maxTemperature = readings.map { $0.temperature }.max() ?? 0
+                avgTemperature = readings.map { $0.temperature }.reduce(0, +) / Double(readings.count)
+            }
         }
     }
 }

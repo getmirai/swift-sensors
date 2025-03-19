@@ -8,6 +8,9 @@ public actor SwiftSensors {
     /// Thermal sensor manager
     private let thermalSensorManager: ThermalSensorManager
     
+    /// Power sensor manager
+    private let powerSensorManager: PowerSensorManager
+    
     /// System stats manager
     private let systemStatsManager: SystemStatsManager
     
@@ -17,6 +20,7 @@ public actor SwiftSensors {
     /// Private initializer for singleton pattern
     private init() {
         thermalSensorManager = ThermalSensorManager.shared
+        powerSensorManager = PowerSensorManager.shared
         systemStatsManager = SystemStatsManager.shared
         formatter = SensorFormatter.shared
     }
@@ -27,6 +31,20 @@ public actor SwiftSensors {
     /// - Returns: An array of thermal sensors
     public func getThermalSensors() async -> [ThermalSensor] {
         return await thermalSensorManager.getAllThermalSensors()
+    }
+    
+    // MARK: - Power Sensors
+    
+    /// Get all available voltage sensors
+    /// - Returns: An array of voltage sensors
+    public func getVoltageSensors() async -> [VoltageSensor] {
+        return await powerSensorManager.getAllVoltageSensors()
+    }
+    
+    /// Get all available current sensors
+    /// - Returns: An array of current sensors
+    public func getCurrentSensors() async -> [CurrentSensor] {
+        return await powerSensorManager.getAllCurrentSensors()
     }
     
     // MARK: - Memory Stats

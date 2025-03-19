@@ -7,6 +7,18 @@ typedef struct __IOHIDEventSystemClient* IOHIDEventSystemClientRef;
 typedef struct __IOHIDEvent *IOHIDEventRef;
 typedef double IOHIDFloat;
 
+// IOHIDEventTypes
+#define kIOHIDEventTypeTemperature 15
+#define kIOHIDEventTypePower 25
+#define IOHIDEventFieldBase(type) (type << 16)
+
+// Apple HID Usage Tables
+#define kHIDPage_AppleVendor 0xff00
+#define kHIDPage_AppleVendorPowerSensor 0xff08
+#define kHIDUsage_AppleVendor_TemperatureSensor 0x0005
+#define kHIDUsage_AppleVendorPowerSensor_Current 0x0002
+#define kHIDUsage_AppleVendorPowerSensor_Voltage 0x0003
+
 @interface HIDServiceClient: NSObject {
     struct {
         struct __IOHIDEventSystemClient *system;

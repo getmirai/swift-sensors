@@ -2,8 +2,12 @@
 @preconcurrency import CoreFoundation
 import PrivateAPI
 
-private let temperatureQuery = query(page: 0xff00, usage: 5)
+private let temperatureQuery = query(page: kHIDPage_AppleVendor, usage: kHIDUsage_AppleVendor_TemperatureSensor)
 private let kIOHIDEventTypeTemperature = Int64(15)
+
+private func eventFieldBase(_ type: Int32) -> Int32 {
+    return type << 16
+}
 
 private func query(
     page: Int32,
@@ -43,8 +47,8 @@ extension HIDServiceClient {
     }
     
     var temperature: Double? {
-        if let event = IOHIDServiceClientCopyEvent(self, kIOHIDEventTypeTemperature, 0, 0) {
-            return IOHIDEventGetFloatValue(event, Int32(kIOHIDEventTypeTemperature << 16))
+        if let event = IOHIDServiceClientCopyEvent(self, Int64(kIOHIDEventTypeTemperature), 0, 0) {
+            return IOHIDEventGetFloatValue(event, eventFieldBase(Int32(kIOHIDEventTypeTemperature)))
         } else {
             return nil
         }
@@ -80,8 +84,11 @@ public actor ThermalSensorManager {
         let entries = getThermalEntries()
         let nameDict = createNameDictionary(of: entries)
         let temps = getTemperatures(from: nameDict)
-        return temps.map { (name, temp) in
+        
+        // Create sensors and sort them by name for consistency
+        let sensors = temps.map { (name, temp) in
             ThermalSensor(name: name, temperature: temp)
         }
+        return sensors.sorted { $0.name < $1.name }
     }
 }

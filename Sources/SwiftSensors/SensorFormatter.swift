@@ -28,6 +28,26 @@ public actor SensorFormatter {
         return String(format: "%.1f °C", temperature)
     }
     
+    /// Format voltage to a human-readable string
+    /// - Parameter voltage: The voltage in volts
+    /// - Returns: A formatted string with voltage unit
+    public func formatVoltage(_ voltage: Double) -> String {
+        return String(format: "%.2f V", voltage)
+    }
+    
+    /// Format current to a human-readable string
+    /// - Parameter current: The current in amperes
+    /// - Returns: A formatted string with current unit
+    public func formatCurrent(_ current: Double) -> String {
+        if abs(current) < 0.001 {
+            return String(format: "%.2f μA", current * 1_000_000)
+        } else if abs(current) < 1.0 {
+            return String(format: "%.2f mA", current * 1_000)
+        } else {
+            return String(format: "%.2f A", current)
+        }
+    }
+    
     /// Format percentage to a human-readable string
     /// - Parameter percentage: The percentage value (0-100)
     /// - Returns: A formatted string with percentage sign

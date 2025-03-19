@@ -1,9 +1,12 @@
 import SwiftUI
 import SwiftSensors
+import Charts
 
 @available(iOS 16.0, *)
 struct ContentView: View {
     @State private var thermalSensors: [ThermalSensor] = []
+    @State private var voltageSensors: [VoltageSensor] = []
+    @State private var currentSensors: [CurrentSensor] = []
     @State private var memoryStats: MemoryStats? = nil
     @State private var cpuStats: CPUStats? = nil
     @State private var diskStats: DiskStats? = nil
@@ -12,6 +15,8 @@ struct ContentView: View {
     
     // Formatted display values
     @State private var formattedTemperatures: [String] = []
+    @State private var formattedVoltages: [String] = []
+    @State private var formattedCurrents: [String] = []
     @State private var formattedMemoryValues: [String] = []
     @State private var formattedCPUValues: [String] = []
     @State private var formattedDiskValues: [String] = []
@@ -151,9 +156,47 @@ struct ContentView: View {
                     }
                 }
                 
+                Section(header: Text("Voltage Sensors")) {
+                    ForEach(Array(zip(voltageSensors.indices, voltageSensors)), id: \.1.id) { index, sensor in
+                        HStack {
+                            Text(sensor.name)
+                            Spacer()
+                            Text(index < formattedVoltages.count ? formattedVoltages[index] : "\(sensor.voltage) V")
+                        }
+                    }
+                    
+                    if voltageSensors.isEmpty {
+                        Text("No voltage sensors found")
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                }
+                
+                Section(header: Text("Current Sensors")) {
+                    ForEach(Array(zip(currentSensors.indices, currentSensors)), id: \.1.id) { index, sensor in
+                        HStack {
+                            Text(sensor.name)
+                            Spacer()
+                            Text(index < formattedCurrents.count ? formattedCurrents[index] : "\(sensor.current) A")
+                        }
+                    }
+                    
+                    if currentSensors.isEmpty {
+                        Text("No current sensors found")
+                            .foregroundColor(.gray)
+                            .italic()
+                    }
+                }
+                
                 Section {
                     NavigationLink(destination: SensorChartView()) {
                         Text("View Temperature Charts")
+                            .font(.headline)
+                            .foregroundColor(.blue)
+                    }
+                    
+                    NavigationLink(destination: Text("Power Charts Coming Soon")) {
+                        Text("View Power Charts")
                             .font(.headline)
                             .foregroundColor(.blue)
                     }
@@ -189,62 +232,82 @@ struct ContentView: View {
         
         // Use Task for async calls
         Task {
-            // Update thermal sensors
-            thermalSensors = await sensors.getThermalSensors()
+            // Create temporary variables to hold fetched data
+            let fetchedThermalSensors = await sensors.getThermalSensors()
+            let fetchedVoltageSensors = await sensors.getVoltageSensors()
+            let fetchedCurrentSensors = await sensors.getCurrentSensors()
+            let fetchedMemoryStats = await sensors.getMemoryStats()
+            let fetchedCPUStats = await sensors.getCPUStats()
+            let fetchedDiskStats = await sensors.getDiskStats()
+            let fetchedThermalState = await sensors.getThermalState()
+            let fetchedUptimeText = await sensors.getFormattedUptime()
             
-            // Format temperature values
-            formattedTemperatures = await withTaskGroup(of: String.self) { group in
-                for sensor in thermalSensors {
-                    group.addTask {
-                        await formatter.formatTemperature(sensor.temperature)
-                    }
-                }
+            // Format all values first
+            var tempFormattedTemperatures: [String] = []
+            var tempFormattedVoltages: [String] = []
+            var tempFormattedCurrents: [String] = []
+            
+            // Temperature formatting
+            for sensor in fetchedThermalSensors {
+                tempFormattedTemperatures.append(await formatter.formatTemperature(sensor.temperature))
+            }
+            
+            // Voltage formatting
+            for sensor in fetchedVoltageSensors {
+                tempFormattedVoltages.append(await formatter.formatVoltage(sensor.voltage))
+            }
+            
+            // Current formatting
+            for sensor in fetchedCurrentSensors {
+                tempFormattedCurrents.append(await formatter.formatCurrent(sensor.current))
+            }
+            
+            // Memory formatting
+            var tempFormattedMemoryValues: [String] = []
+            tempFormattedMemoryValues = [
+                await formatter.formatBytes(fetchedMemoryStats.totalMemory),
+                await formatter.formatBytes(fetchedMemoryStats.freeMemory),
+                await formatter.formatBytes(fetchedMemoryStats.activeMemory),
+                await formatter.formatBytes(fetchedMemoryStats.wiredMemory),
+                await formatter.formatBytes(fetchedMemoryStats.totalUsedMemory)
+            ]
+            
+            // CPU formatting
+            var tempFormattedCPUValues: [String] = []
+            tempFormattedCPUValues = [
+                await formatter.formatPercentage(fetchedCPUStats.totalUsage),
+                await formatter.formatPercentage(fetchedCPUStats.userUsage),
+                await formatter.formatPercentage(fetchedCPUStats.systemUsage)
+            ]
+            
+            // Disk formatting
+            var tempFormattedDiskValues: [String] = []
+            tempFormattedDiskValues = [
+                await formatter.formatBytes(fetchedDiskStats.totalSpace),
+                await formatter.formatBytes(fetchedDiskStats.usedSpace),
+                await formatter.formatBytes(fetchedDiskStats.freeSpace)
+            ]
+            
+            // Update UI on the main thread with all data at once
+            await MainActor.run {
+                // Update all sensor data
+                thermalSensors = fetchedThermalSensors
+                voltageSensors = fetchedVoltageSensors
+                currentSensors = fetchedCurrentSensors
+                memoryStats = fetchedMemoryStats
+                cpuStats = fetchedCPUStats
+                diskStats = fetchedDiskStats
+                thermalState = fetchedThermalState
+                uptimeText = fetchedUptimeText
                 
-                var results: [String] = []
-                for await result in group {
-                    results.append(result)
-                }
-                return results
+                // Update formatted values
+                formattedTemperatures = tempFormattedTemperatures
+                formattedVoltages = tempFormattedVoltages
+                formattedCurrents = tempFormattedCurrents
+                formattedMemoryValues = tempFormattedMemoryValues
+                formattedCPUValues = tempFormattedCPUValues
+                formattedDiskValues = tempFormattedDiskValues
             }
-            
-            // Update memory, CPU, and disk stats
-            memoryStats = await sensors.getMemoryStats()
-            if let stats = memoryStats {
-                // Format memory values
-                formattedMemoryValues = await [
-                    formatter.formatBytes(stats.totalMemory),
-                    formatter.formatBytes(stats.freeMemory),
-                    formatter.formatBytes(stats.activeMemory),
-                    formatter.formatBytes(stats.wiredMemory),
-                    formatter.formatBytes(stats.totalUsedMemory)
-                ]
-            }
-            
-            cpuStats = await sensors.getCPUStats()
-            if let stats = cpuStats {
-                // Format CPU values
-                formattedCPUValues = await [
-                    formatter.formatPercentage(stats.totalUsage),
-                    formatter.formatPercentage(stats.userUsage),
-                    formatter.formatPercentage(stats.systemUsage)
-                ]
-            }
-            
-            diskStats = await sensors.getDiskStats()
-            if let stats = diskStats {
-                // Format disk values
-                formattedDiskValues = await [
-                    formatter.formatBytes(stats.totalSpace),
-                    formatter.formatBytes(stats.usedSpace),
-                    formatter.formatBytes(stats.freeSpace)
-                ]
-            }
-            
-            // Update thermal state
-            thermalState = await sensors.getThermalState()
-            
-            // Update uptime
-            uptimeText = await sensors.getFormattedUptime()
         }
     }
 }

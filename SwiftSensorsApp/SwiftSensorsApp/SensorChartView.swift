@@ -103,26 +103,29 @@ struct SensorChartView: View {
             let sensors = await SwiftSensors.shared.getThermalSensors()
             let now = Date()
             
-            // Create new data points
-            let newData = sensors.map { SensorData(timestamp: now, sensorName: $0.name, value: $0.temperature) }
-            thermalData.append(contentsOf: newData)
-            
-            // Keep data capped to 3 hours worth of points to manage memory
-            let maxPoints = 3 * 60 * 60 // 3 hours with 1 reading per second
-            if thermalData.count > maxPoints {
-                thermalData = Array(thermalData.suffix(maxPoints))
-            }
-            
-            // Update available sensors list if needed
-            let sensorNames = Set(sensors.map { $0.name })
-            if sensorNames != Set(availableSensors) {
-                availableSensors = Array(sensorNames).sorted()
+            // Update UI on the main thread
+            await MainActor.run {
+                // Create new data points
+                let newData = sensors.map { SensorData(timestamp: now, sensorName: $0.name, value: $0.temperature) }
+                thermalData.append(contentsOf: newData)
                 
-                // Auto-select sensors if none are selected yet
-                if selectedSensors.isEmpty && !availableSensors.isEmpty {
-                    // Select up to 3 sensors by default
-                    let sensorsToSelect = min(3, availableSensors.count)
-                    selectedSensors = Set(availableSensors.prefix(sensorsToSelect))
+                // Keep data capped to 3 hours worth of points to manage memory
+                let maxPoints = 3 * 60 * 60 // 3 hours with 1 reading per second
+                if thermalData.count > maxPoints {
+                    thermalData = Array(thermalData.suffix(maxPoints))
+                }
+                
+                // Update available sensors list if needed
+                let sensorNames = Set(sensors.map { $0.name })
+                if sensorNames != Set(availableSensors) {
+                    availableSensors = Array(sensorNames).sorted()
+                    
+                    // Auto-select sensors if none are selected yet
+                    if selectedSensors.isEmpty && !availableSensors.isEmpty {
+                        // Select up to 3 sensors by default
+                        let sensorsToSelect = min(3, availableSensors.count)
+                        selectedSensors = Set(availableSensors.prefix(sensorsToSelect))
+                    }
                 }
             }
         }
