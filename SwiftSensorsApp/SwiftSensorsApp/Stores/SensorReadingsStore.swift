@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Store for maintaining sensor reading history and statistics
-@available(iOS 16.0, *)
+
 @Observable class SensorReadingsStore {
     /// Historical readings for the sensor
     var readings: [TemperatureReading] = []

@@ -3,29 +3,34 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		184EAC6E2D8B34B100D460F3 /* SwiftSensors in Frameworks */ = {isa = PBXBuildFile; productRef = 184EAC6D2D8B34B100D460F3 /* SwiftSensors */; };
-		35B5FEEB2B18D12F00361823 /* SwiftSensorsAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B5FEEA2B18D12F00361823 /* SwiftSensorsAppApp.swift */; };
-		35B5FEED2B18D12F00361823 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B5FEEC2B18D12F00361823 /* ContentView.swift */; };
+		184EAEA62D8B8A6B00D460F3 /* PowerSensorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EAE842D8B8A6B00D460F3 /* PowerSensorsView.swift */; };
+		184EAEA92D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */; };
 		35B5FEEF2B18D13000361823 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35B5FEEE2B18D13000361823 /* Assets.xcassets */; };
 		35B5FEF22B18D13000361823 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35B5FEF12B18D13000361823 /* Preview Assets.xcassets */; };
-		35B5FF152B18D16B00361823 /* SensorDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B5FF142B18D16B00361823 /* SensorDetailView.swift */; };
-		35B5FF172B18D39800361823 /* SensorChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35B5FF162B18D39800361823 /* SensorChartView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		184EAE842D8B8A6B00D460F3 /* PowerSensorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerSensorsView.swift; sourceTree = "<group>"; };
+		184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSensorsAppApp.swift; sourceTree = "<group>"; };
 		35B5FEE72B18D12F00361823 /* SwiftSensorsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftSensorsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		35B5FEEA2B18D12F00361823 /* SwiftSensorsAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSensorsAppApp.swift; sourceTree = "<group>"; };
-		35B5FEEC2B18D12F00361823 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		35B5FEEE2B18D13000361823 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		35B5FEF12B18D13000361823 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		35B5FF142B18D16B00361823 /* SensorDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorDetailView.swift; sourceTree = "<group>"; };
-		35B5FF162B18D39800361823 /* SensorChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorChartView.swift; sourceTree = "<group>"; };
 		35B5FF1A2B18D45600361823 /* SwiftSensorsApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftSensorsApp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		184EAE812D8B8A6B00D460F3 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
+		184EAE832D8B8A6B00D460F3 /* Navigation */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Navigation; sourceTree = "<group>"; };
+		184EAE862D8B8A6B00D460F3 /* Preview Content */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Preview Content"; sourceTree = "<group>"; };
+		184EAE8A2D8B8A6B00D460F3 /* Stores */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Stores; sourceTree = "<group>"; };
+		184EAE8D2D8B8A6B00D460F3 /* ViewModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ViewModels; sourceTree = "<group>"; };
+		184EAEA32D8B8A6B00D460F3 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		35B5FEE42B18D12F00361823 /* Frameworks */ = {
@@ -58,11 +63,15 @@
 		35B5FEE92B18D12F00361823 /* SwiftSensorsApp */ = {
 			isa = PBXGroup;
 			children = (
+				184EAE812D8B8A6B00D460F3 /* Models */,
+				184EAE832D8B8A6B00D460F3 /* Navigation */,
+				184EAE842D8B8A6B00D460F3 /* PowerSensorsView.swift */,
+				184EAE862D8B8A6B00D460F3 /* Preview Content */,
+				184EAE8A2D8B8A6B00D460F3 /* Stores */,
+				184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */,
+				184EAE8D2D8B8A6B00D460F3 /* ViewModels */,
+				184EAEA32D8B8A6B00D460F3 /* Views */,
 				35B5FF1A2B18D45600361823 /* SwiftSensorsApp.entitlements */,
-				35B5FEEA2B18D12F00361823 /* SwiftSensorsAppApp.swift */,
-				35B5FEEC2B18D12F00361823 /* ContentView.swift */,
-				35B5FF142B18D16B00361823 /* SensorDetailView.swift */,
-				35B5FF162B18D39800361823 /* SensorChartView.swift */,
 				35B5FEEE2B18D13000361823 /* Assets.xcassets */,
 				35B5FEF02B18D13000361823 /* Preview Content */,
 			);
@@ -91,6 +100,14 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				184EAE812D8B8A6B00D460F3 /* Models */,
+				184EAE832D8B8A6B00D460F3 /* Navigation */,
+				184EAE862D8B8A6B00D460F3 /* Preview Content */,
+				184EAE8A2D8B8A6B00D460F3 /* Stores */,
+				184EAE8D2D8B8A6B00D460F3 /* ViewModels */,
+				184EAEA32D8B8A6B00D460F3 /* Views */,
 			);
 			name = SwiftSensorsApp;
 			packageProductDependencies = (
@@ -152,10 +169,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				35B5FF172B18D39800361823 /* SensorChartView.swift in Sources */,
-				35B5FEED2B18D12F00361823 /* ContentView.swift in Sources */,
-				35B5FEEB2B18D12F00361823 /* SwiftSensorsAppApp.swift in Sources */,
-				35B5FF152B18D16B00361823 /* SensorDetailView.swift in Sources */,
+				184EAEA62D8B8A6B00D460F3 /* PowerSensorsView.swift in Sources */,
+				184EAEA92D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

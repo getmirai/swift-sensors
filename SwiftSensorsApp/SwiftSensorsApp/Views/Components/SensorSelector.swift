@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// UI for selecting sensors to display in charts
-@available(iOS 16.0, *)
+
 struct SensorSelector: View {
     /// Available sensors to select from
     let availableSensors: [String]

@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// A reusable component for displaying a statistic with a title and value
-@available(iOS 16.0, *)
+
 struct StatBox: View {
     /// The title shown above the value
     let title: String

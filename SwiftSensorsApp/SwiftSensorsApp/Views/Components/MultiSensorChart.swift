@@ -2,7 +2,7 @@ import SwiftUI
 import Charts
 
 /// Chart display for multiple sensors
-@available(iOS 16.0, *)
+
 struct MultiSensorChart: View {
     /// Data for the chart
     let data: [SensorData]

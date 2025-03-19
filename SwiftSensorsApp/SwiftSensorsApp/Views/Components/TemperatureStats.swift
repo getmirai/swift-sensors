@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Display for temperature statistics
-@available(iOS 16.0, *)
+
 struct TemperatureStats: View {
     /// Minimum temperature
     let minTemperature: Double

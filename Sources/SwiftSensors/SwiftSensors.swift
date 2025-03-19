@@ -1,7 +1,7 @@
 import Foundation
 
 /// The main actor for accessing all sensor data
-@available(macOS 10.15, *)
+
 public actor SwiftSensors {
     /// Shared instance for easy access
     public static let shared = SwiftSensors()

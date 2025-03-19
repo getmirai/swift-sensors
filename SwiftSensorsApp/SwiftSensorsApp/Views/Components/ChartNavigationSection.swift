@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Navigation section for charts
-@available(iOS 16.0, *)
+
 struct ChartNavigationSection: View {
     /// Action for temperature charts
     var onTemperatureChartsSelected: () -> Void

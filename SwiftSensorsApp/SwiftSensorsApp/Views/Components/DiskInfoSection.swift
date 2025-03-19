@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Display section for disk information
-@available(iOS 16.0, *)
+
 struct DiskInfoSection: View {
     /// The sensor view model
     var viewModel: SensorsViewModel

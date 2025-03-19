@@ -2,7 +2,7 @@ import SwiftUI
 import Charts
 import SwiftSensors
 
-@available(iOS 16.0, *)
+
 struct PowerSensorData: Identifiable {
     let id = UUID()
     let timestamp: Date
@@ -16,7 +16,7 @@ struct PowerSensorData: Identifiable {
     }
 }
 
-@available(iOS 16.0, *)
+
 struct PowerSensorsView: View {
     @State private var powerData: [PowerSensorData] = []
     @State private var selectedSensors: Set<String> = []
@@ -200,7 +200,7 @@ struct PowerSensorsView: View {
     }
 }
 
-@available(iOS 16.0, *)
+
 struct PowerSensorsView_Previews: PreviewProvider {
     static var previews: some View {
         PowerSensorsView()

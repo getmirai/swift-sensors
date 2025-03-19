@@ -3,7 +3,7 @@ import Charts
 import SwiftSensors
 
 /// Chart view showing multiple sensors over time
-@available(iOS 16.0, *)
+
 struct SensorChartView: View {
     /// Data collected from sensors
     @State private var thermalData: [SensorData] = []

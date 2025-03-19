@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Display section for voltage sensors
-@available(iOS 16.0, *)
+
 struct VoltageSensorsSection: View {
     /// The sensor view model
     var viewModel: SensorsViewModel

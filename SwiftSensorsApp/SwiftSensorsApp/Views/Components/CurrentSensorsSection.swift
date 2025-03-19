@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Display section for current sensors
-@available(iOS 16.0, *)
+
 struct CurrentSensorsSection: View {
     /// The sensor view model
     var viewModel: SensorsViewModel

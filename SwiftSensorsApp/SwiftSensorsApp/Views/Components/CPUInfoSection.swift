@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Display section for CPU information
-@available(iOS 16.0, *)
+
 struct CPUInfoSection: View {
     /// The sensor view model
     var viewModel: SensorsViewModel

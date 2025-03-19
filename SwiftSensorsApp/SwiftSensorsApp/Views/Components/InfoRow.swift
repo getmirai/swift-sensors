@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Reusable information row with label and value
-@available(iOS 16.0, *)
+
 struct InfoRow: View {
     /// The label shown on the left
     let label: String

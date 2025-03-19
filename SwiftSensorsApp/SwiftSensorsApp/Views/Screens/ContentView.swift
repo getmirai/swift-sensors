@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Main content view for the app
-@available(iOS 16.0, *)
+
 struct ContentView: View {
     /// The shared view model
     private var viewModel = SensorsViewModel.shared

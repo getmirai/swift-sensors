@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Display section for system information
-@available(iOS 16.0, *)
+
 struct SystemInfoSection: View {
     /// The sensor view model
     var viewModel: SensorsViewModel

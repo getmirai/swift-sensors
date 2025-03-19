@@ -2,7 +2,7 @@ import SwiftUI
 import Charts
 
 /// Chart component for temperature readings
-@available(iOS 16.0, *)
+
 struct TemperatureChart: View {
     /// The store containing temperature readings
     let store: SensorReadingsStore

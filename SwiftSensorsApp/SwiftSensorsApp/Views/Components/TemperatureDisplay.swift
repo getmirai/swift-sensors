@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Display for current temperature reading
-@available(iOS 16.0, *)
+
 struct TemperatureDisplay: View {
     /// The temperature value to display
     let temperature: Double

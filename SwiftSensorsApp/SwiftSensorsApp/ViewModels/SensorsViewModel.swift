@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftSensors
 
-@available(iOS 16.0, *)
+
 @Observable class SensorsViewModel {
     // Sensor data
     var thermalSensors: [ThermalSensor] = []

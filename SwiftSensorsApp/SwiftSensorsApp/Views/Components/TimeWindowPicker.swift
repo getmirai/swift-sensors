@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// UI for selecting time window for charts
-@available(iOS 16.0, *)
+
 struct TimeWindowPicker: View {
     /// The selected time window
     @Binding var timeWindow: TimeInterval

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Detail view for a specific temperature sensor
-@available(iOS 16.0, *)
+
 struct SensorDetailView: View {
     /// The name of the sensor
     let sensorName: String

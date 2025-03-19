@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a single sensor reading for display in charts
-@available(iOS 16.0, *)
+
 struct SensorData: Identifiable {
     /// Unique identifier
     let id = UUID()

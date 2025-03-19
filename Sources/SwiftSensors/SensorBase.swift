@@ -6,14 +6,14 @@ import PrivateAPI
 import CoreFoundation.CFArray
 
 /// Base protocol for all sensor types
-@available(macOS 10.15, *)
+
 public protocol BaseSensor: Identifiable, Sendable {
     var id: String { get }
     var name: String { get }
 }
 
 /// Base protocol for all sensor managers
-@available(macOS 10.15, *)
+
 public protocol SensorManager {
     associatedtype SensorType: BaseSensor
     static var shared: Self { get }

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Display section for memory information
-@available(iOS 16.0, *)
+
 struct MemoryInfoSection: View {
     /// The sensor view model
     var viewModel: SensorsViewModel

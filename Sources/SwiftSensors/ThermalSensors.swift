@@ -3,7 +3,7 @@
 import PrivateAPI
 
 /// A struct representing a thermal sensor
-@available(macOS 10.15, *)
+
 public struct ThermalSensor: BaseSensor {
     /// Unique identifier for the sensor
     public let id: String
@@ -20,7 +20,7 @@ public struct ThermalSensor: BaseSensor {
 }
 
 /// A manager actor for thermal sensors
-@available(macOS 10.15, *)
+
 public actor ThermalSensorManager: SensorManager {
     public typealias SensorType = ThermalSensor
     

@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftSensors
 
 /// Display section for thermal sensors
-@available(iOS 16.0, *)
+
 struct ThermalSensorsSection: View {
     /// The sensor view model
     var viewModel: SensorsViewModel
