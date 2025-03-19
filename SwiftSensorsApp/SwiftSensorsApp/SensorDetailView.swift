@@ -10,12 +10,12 @@ struct TemperatureReading: Identifiable {
 }
 
 @available(iOS 16.0, *)
-class SensorReadingsStore: ObservableObject {
-    @Published var readings: [TemperatureReading] = []
-    @Published var minTemperature: Double = 0
-    @Published var maxTemperature: Double = 0
-    @Published var avgTemperature: Double = 0
-    @Published var currentTemperature: Double = 0
+@Observable class SensorReadingsStore {
+    var readings: [TemperatureReading] = []
+    var minTemperature: Double = 0
+    var maxTemperature: Double = 0
+    var avgTemperature: Double = 0
+    var currentTemperature: Double = 0
     
     // Cache for readings by sensor name
     static var stores: [String: SensorReadingsStore] = [:]
@@ -35,8 +35,8 @@ class SensorReadingsStore: ObservableObject {
 struct SensorDetailView: View {
     let sensorName: String
     
-    // Use a stable ObservableObject for this view
-    @StateObject private var store: SensorReadingsStore
+    // With @Observable, we can use a simple property
+    private var store: SensorReadingsStore
     
     // Timer for updating readings
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -44,7 +44,7 @@ struct SensorDetailView: View {
     init(sensorName: String) {
         self.sensorName = sensorName
         // Get or create a persistent store for this sensor
-        _store = StateObject(wrappedValue: SensorReadingsStore.getStore(for: sensorName))
+        self.store = SensorReadingsStore.getStore(for: sensorName)
     }
     
     var body: some View {

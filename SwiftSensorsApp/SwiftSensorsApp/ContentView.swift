@@ -3,23 +3,23 @@ import SwiftSensors
 import Charts
 
 @available(iOS 16.0, *)
-class SensorsViewModel: ObservableObject {
-    @Published var thermalSensors: [ThermalSensor] = []
-    @Published var voltageSensors: [VoltageSensor] = []
-    @Published var currentSensors: [CurrentSensor] = []
-    @Published var memoryStats: MemoryStats? = nil
-    @Published var cpuStats: CPUStats? = nil
-    @Published var diskStats: DiskStats? = nil
-    @Published var thermalState: ThermalState = .unknown
-    @Published var uptimeText: String = "Loading..."
+@Observable class SensorsViewModel {
+    var thermalSensors: [ThermalSensor] = []
+    var voltageSensors: [VoltageSensor] = []
+    var currentSensors: [CurrentSensor] = []
+    var memoryStats: MemoryStats? = nil
+    var cpuStats: CPUStats? = nil
+    var diskStats: DiskStats? = nil
+    var thermalState: ThermalState = .unknown
+    var uptimeText: String = "Loading..."
     
     // Formatted display values
-    @Published var formattedTemperatures: [String] = []
-    @Published var formattedVoltages: [String] = []
-    @Published var formattedCurrents: [String] = []
-    @Published var formattedMemoryValues: [String] = []
-    @Published var formattedCPUValues: [String] = []
-    @Published var formattedDiskValues: [String] = []
+    var formattedTemperatures: [String] = []
+    var formattedVoltages: [String] = []
+    var formattedCurrents: [String] = []
+    var formattedMemoryValues: [String] = []
+    var formattedCPUValues: [String] = []
+    var formattedDiskValues: [String] = []
     
     // Cache to ensure sensor readings persist across UI updates
     private var lastUpdateTime = Date.distantPast
@@ -131,7 +131,8 @@ class SensorsViewModel: ObservableObject {
 
 @available(iOS 16.0, *)
 struct ContentView: View {
-    @StateObject private var viewModel = SensorsViewModel.shared
+    // With @Observable, we no longer need @StateObject
+    private var viewModel = SensorsViewModel.shared
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var body: some View {
