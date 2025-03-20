@@ -2,6 +2,20 @@ import SwiftUI
 import SwiftSensors
 
 
+/// Environment key for the SensorsViewModel
+struct SensorsViewModelKey: EnvironmentKey {
+    static let defaultValue = SensorsViewModel()
+}
+
+/// Environment extension for accessing the SensorsViewModel
+extension EnvironmentValues {
+    var sensorsViewModel: SensorsViewModel {
+        get { self[SensorsViewModelKey.self] }
+        set { self[SensorsViewModelKey.self] = newValue }
+    }
+}
+
+/// View model for sensor data management
 @Observable class SensorsViewModel {
     // Sensor data
     var thermalSensors: [ThermalSensor] = []
@@ -44,10 +58,7 @@ import SwiftSensors
     
     let formatter = SensorFormatter.shared
     
-    // Singleton instance
-    static let shared = SensorsViewModel()
-    
-    private init() {
+    init() {
         // Initial data load
         updateSensorData()
     }
@@ -344,66 +355,64 @@ import SwiftSensors
             let (tempFormattedCPUValues, newCPUData) = cpuDataResults
             let (tempFormattedDiskValues, newDiskData) = diskDataResults
             
-            await MainActor.run {
-                // Get a reference to self to avoid capturing mutable properties
-                let viewModel = SensorsViewModel.shared
+            await MainActor.run { [weak self] in
+                guard let self = self else { return }
                 
                 // Update all sensor data
-                viewModel.thermalSensors = fetchedThermalSensors
-                viewModel.voltageSensors = fetchedVoltageSensors
-                viewModel.currentSensors = fetchedCurrentSensors
-                viewModel.memoryStats = fetchedMemoryStats
-                viewModel.cpuStats = fetchedCPUStats
-                viewModel.diskStats = fetchedDiskStats
-                viewModel.thermalState = fetchedThermalState
-                viewModel.uptimeText = fetchedUptimeText
+                self.thermalSensors = fetchedThermalSensors
+                self.voltageSensors = fetchedVoltageSensors
+                self.currentSensors = fetchedCurrentSensors
+                self.memoryStats = fetchedMemoryStats
+                self.cpuStats = fetchedCPUStats
+                self.diskStats = fetchedDiskStats
+                self.thermalState = fetchedThermalState
+                self.uptimeText = fetchedUptimeText
                 
                 // Update formatted values - all of these are now local immutable values
-                viewModel.formattedTemperatures = tempFormattedTemperatures
-                viewModel.formattedVoltages = tempFormattedVoltages
-                viewModel.formattedCurrents = tempFormattedCurrents
-                viewModel.formattedMemoryValues = tempFormattedMemoryValues
-                viewModel.formattedCPUValues = tempFormattedCPUValues
-                viewModel.formattedDiskValues = tempFormattedDiskValues
+                self.formattedTemperatures = tempFormattedTemperatures
+                self.formattedVoltages = tempFormattedVoltages
+                self.formattedCurrents = tempFormattedCurrents
+                self.formattedMemoryValues = tempFormattedMemoryValues
+                self.formattedCPUValues = tempFormattedCPUValues
+                self.formattedDiskValues = tempFormattedDiskValues
                 
                 // Update historical data collections
-                viewModel.thermalSensorData.append(contentsOf: newThermalData)
-                viewModel.voltageSensorData.append(contentsOf: newVoltageData)
-                viewModel.currentSensorData.append(contentsOf: newCurrentData)
-                viewModel.memoryMetricData.append(contentsOf: newMemoryData)
-                viewModel.cpuMetricData.append(contentsOf: newCPUData)
-                viewModel.diskMetricData.append(contentsOf: newDiskData)
+                self.thermalSensorData.append(contentsOf: newThermalData)
+                self.voltageSensorData.append(contentsOf: newVoltageData)
+                self.currentSensorData.append(contentsOf: newCurrentData)
+                self.memoryMetricData.append(contentsOf: newMemoryData)
+                self.cpuMetricData.append(contentsOf: newCPUData)
+                self.diskMetricData.append(contentsOf: newDiskData)
                 
                 // Cap data collections to manage memory (3 hours of data at 1 reading per second)
                 let maxDataPoints = 3 * 60 * 60
                 
                 // Cap each data collection
-                if viewModel.thermalSensorData.count > maxDataPoints {
-                    viewModel.thermalSensorData = Array(viewModel.thermalSensorData.suffix(maxDataPoints))
+                if self.thermalSensorData.count > maxDataPoints {
+                    self.thermalSensorData = Array(self.thermalSensorData.suffix(maxDataPoints))
                 }
                 
-                if viewModel.voltageSensorData.count > maxDataPoints {
-                    viewModel.voltageSensorData = Array(viewModel.voltageSensorData.suffix(maxDataPoints))
+                if self.voltageSensorData.count > maxDataPoints {
+                    self.voltageSensorData = Array(self.voltageSensorData.suffix(maxDataPoints))
                 }
                 
-                if viewModel.currentSensorData.count > maxDataPoints {
-                    viewModel.currentSensorData = Array(viewModel.currentSensorData.suffix(maxDataPoints))
+                if self.currentSensorData.count > maxDataPoints {
+                    self.currentSensorData = Array(self.currentSensorData.suffix(maxDataPoints))
                 }
                 
-                if viewModel.memoryMetricData.count > maxDataPoints {
-                    viewModel.memoryMetricData = Array(viewModel.memoryMetricData.suffix(maxDataPoints))
+                if self.memoryMetricData.count > maxDataPoints {
+                    self.memoryMetricData = Array(self.memoryMetricData.suffix(maxDataPoints))
                 }
                 
-                if viewModel.cpuMetricData.count > maxDataPoints {
-                    viewModel.cpuMetricData = Array(viewModel.cpuMetricData.suffix(maxDataPoints))
+                if self.cpuMetricData.count > maxDataPoints {
+                    self.cpuMetricData = Array(self.cpuMetricData.suffix(maxDataPoints))
                 }
                 
-                if viewModel.diskMetricData.count > maxDataPoints {
-                    viewModel.diskMetricData = Array(viewModel.diskMetricData.suffix(maxDataPoints))
+                if self.diskMetricData.count > maxDataPoints {
+                    self.diskMetricData = Array(self.diskMetricData.suffix(maxDataPoints))
                 }
                 
-                // Update timestamp
-                viewModel.lastUpdateTime = now
+                self.lastUpdateTime = now
             }
         }
     }

@@ -3,8 +3,8 @@ import SwiftSensors
 
 /// Main content view for the app
 struct ContentView: View {
-    /// The shared view model
-    private var viewModel = SensorsViewModel.shared
+    /// Access the view model from the environment
+    @Environment(\.sensorsViewModel) private var viewModel
     
     /// Timer for regular updates
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -51,7 +51,7 @@ struct ContentView: View {
 /// A view that displays the details of a particular sensor section
 struct SectionDetailView: View {
     let section: SensorSection
-    @State private var viewModel = SensorsViewModel.shared
+    @Environment(\.sensorsViewModel) private var viewModel
     
     /// Timer for regular updates
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()

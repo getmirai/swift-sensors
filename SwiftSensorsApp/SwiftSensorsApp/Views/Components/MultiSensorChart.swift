@@ -25,7 +25,6 @@ struct BaseChartView: View {
                         y: .value(yAxisTitle, reading.value)
                     )
                     .foregroundStyle(by: .value("Sensor", reading.sensorName))
-                    .interpolationMethod(.catmullRom) // Smooth curves
                 }
                 .chartXAxis {
                     AxisMarks(position: .bottom)
@@ -50,8 +49,8 @@ struct BaseChartView: View {
 
 /// Chart display for thermal sensors using the unified model
 struct MultiSensorChart: View {
-    /// The view model with sensor data
-    @State private var viewModel = SensorsViewModel.shared
+    /// Access the view model from the environment
+    @Environment(\.sensorsViewModel) private var viewModel
     
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
@@ -71,8 +70,8 @@ struct MultiSensorChart: View {
 
 /// Chart display for voltage sensors using the unified model
 struct VoltageChart: View {
-    /// The view model with sensor data
-    @State private var viewModel = SensorsViewModel.shared
+    /// Access the view model from the environment
+    @Environment(\.sensorsViewModel) private var viewModel
     
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
@@ -92,8 +91,8 @@ struct VoltageChart: View {
 
 /// Chart display for current sensors using the unified model
 struct CurrentChart: View {
-    /// The view model with sensor data
-    @State private var viewModel = SensorsViewModel.shared
+    /// Access the view model from the environment
+    @Environment(\.sensorsViewModel) private var viewModel
     
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default

@@ -7,6 +7,9 @@ struct SensorDetailView: View {
     /// The name of the sensor
     let sensorName: String
     
+    /// Access the view model from the environment
+    @Environment(\.sensorsViewModel) private var viewModel
+    
     /// Data store for this sensor
     private var store: SensorReadingsStore
     
@@ -49,8 +52,7 @@ struct SensorDetailView: View {
     private func updateReadings() {
         // Use Task for async calls
         Task {
-            // Get sensor from shared view model
-            let viewModel = SensorsViewModel.shared
+            // Use the viewModel property
             
             // Ensure view model has updated data
             viewModel.updateIfNeeded()

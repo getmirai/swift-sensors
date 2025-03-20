@@ -4,8 +4,8 @@ import SwiftSensors
 
 /// Chart display for memory metrics using the unified model
 struct MemoryChart: View {
-    /// The view model with sensor data
-    @State private var viewModel = SensorsViewModel.shared
+    /// Access the view model from the environment
+    @Environment(\.sensorsViewModel) private var viewModel
     
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
@@ -33,8 +33,8 @@ struct MemoryChart: View {
 
 /// Chart display for CPU metrics using the unified model
 struct CPUChart: View {
-    /// The view model with sensor data
-    @State private var viewModel = SensorsViewModel.shared
+    /// Access the view model from the environment
+    @Environment(\.sensorsViewModel) private var viewModel
     
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
@@ -55,8 +55,8 @@ struct CPUChart: View {
 
 /// Chart display for disk metrics using the unified model
 struct DiskChart: View {
-    /// The view model with sensor data
-    @State private var viewModel = SensorsViewModel.shared
+    /// Access the view model from the environment
+    @Environment(\.sensorsViewModel) private var viewModel
     
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default

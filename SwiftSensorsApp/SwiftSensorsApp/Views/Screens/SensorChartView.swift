@@ -4,7 +4,7 @@ import SwiftSensors
 
 /// Chart view showing multiple sensors over time - This is a legacy view kept for backward compatibility
 struct SensorChartView: View {
-    @State private var viewModel = SensorsViewModel.shared
+    @Environment(\.sensorsViewModel) private var viewModel
     
     var body: some View {
         VStack {
