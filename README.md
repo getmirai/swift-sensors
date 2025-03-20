@@ -1,10 +1,10 @@
 # SwiftSensors
 
-A Swift package for accessing device sensor data, including thermal sensors, memory, CPU, and disk statistics.
+A Swift package for accessing real device sensor readings, including thermal readings, memory, CPU, and disk statistics.
 
 ## Features
 
-- Access thermal sensor data (temperature readings from internal sensors)
+- Access thermal sensor readings (temperature readings from internal sensors)
 - Memory usage statistics (free, active, inactive, wired, compressed)
 - CPU usage statistics (total, user, system, idle)
 - Disk space information
@@ -32,30 +32,30 @@ import SwiftSensors
 // Get an instance of the sensor manager
 let sensors = SwiftSensors.shared
 
-// Get thermal sensor data
-let thermalSensors = sensors.getThermalSensors()
-for sensor in thermalSensors {
-    print("\(sensor.name): \(SensorFormatter.shared.formatTemperature(sensor.temperature))")
+// Get thermal sensor readings
+let thermalReadings = await sensors.getThermalSensorReadings()
+for reading in thermalReadings {
+    print("\(reading.name): \(SensorFormatter.shared.formatTemperature(reading.temperature))")
 }
 
 // Get memory statistics
-let memoryStats = sensors.getMemoryStats()
-print("Memory Usage: \(sensors.getFormattedMemoryUsage())")
+let memoryStats = await sensors.getMemoryStats()
+print("Memory Usage: \(await sensors.getFormattedMemoryUsage())")
 
 // Get CPU statistics
-let cpuStats = sensors.getCPUStats()
-print("CPU Usage: \(sensors.getFormattedCPUUsage())")
+let cpuStats = await sensors.getCPUStats()
+print("CPU Usage: \(await sensors.getFormattedCPUUsage())")
 
 // Get disk statistics
-let diskStats = sensors.getDiskStats()
-print("Disk Usage: \(sensors.getFormattedDiskUsage())")
+let diskStats = await sensors.getDiskStats()
+print("Disk Usage: \(await sensors.getFormattedDiskUsage())")
 
 // Get thermal state
-let thermalState = sensors.getThermalState()
+let thermalState = await sensors.getThermalState()
 print("Thermal State: \(thermalState.rawValue)")
 
 // Get system uptime
-print("System Uptime: \(sensors.getFormattedUptime())")
+print("System Uptime: \(await sensors.getFormattedUptime())")
 ```
 
 ## Requirements
