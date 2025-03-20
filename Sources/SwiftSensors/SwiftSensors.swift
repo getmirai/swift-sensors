@@ -1,6 +1,18 @@
 import Foundation
 
-/// The main actor for accessing all sensor data
+/// The main actor for accessing all sensor data in a device.
+///
+/// This actor provides a centralized interface for accessing various device sensors 
+/// and system information. It uses dedicated manager actors for each category of sensors
+/// to ensure thread safety and data consistency.
+///
+/// Use the shared instance to access all sensor data:
+/// ```swift
+/// let sensors = SwiftSensors.shared
+/// let thermalSensors = await sensors.getThermalSensors()
+/// ```
+///
+/// - Note: All methods are asynchronous and should be called with `await`.
 
 public actor SwiftSensors {
     /// Shared instance for easy access

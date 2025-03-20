@@ -245,7 +245,7 @@ struct SectionDetailView: View {
 
         case .memory:
             if self.viewModel.memoryStats != nil {
-                let labels = ["Total Memory", "Free Memory", "Active Memory", "Wired Memory", "Used Memory"]
+                let labels = ["Total Physical", "Free", "Active", "Inactive", "Wired", "Compressed", "Sum", "Available to App", "Unavailable Remainder"]
 
                 ForEach(0..<labels.count, id: \.self) { index in
                     let isSelected = self.viewModel.selectedMemoryItems.contains(index)

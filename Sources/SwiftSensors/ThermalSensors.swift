@@ -2,7 +2,19 @@
 @preconcurrency import Foundation
 import PrivateAPI
 
-/// A struct representing a thermal sensor
+/// A struct representing a thermal sensor in the device.
+///
+/// Thermal sensors measure temperature at various points in the device.
+/// These measurements are useful for monitoring device health and detecting 
+/// potential overheating issues.
+///
+/// Example usage:
+/// ```swift
+/// let thermalSensors = await SwiftSensors.shared.getThermalSensors()
+/// for sensor in thermalSensors {
+///     print("\(sensor.name): \(sensor.temperature)°C")
+/// }
+/// ```
 
 public struct ThermalSensor: BaseSensor {
     /// Unique identifier for the sensor

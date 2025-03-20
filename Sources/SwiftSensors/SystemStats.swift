@@ -1,8 +1,7 @@
 import Foundation
-#if canImport(UIKit)
-import UIKit
-#endif
 import os
+import UIKit
+import Darwin
 
 /// A structure representing memory statistics
 public struct MemoryStats: Sendable {
@@ -65,113 +64,179 @@ public enum ThermalState: String, Sendable {
 public actor SystemStatsManager {
     /// Shared instance for easy access
     public static let shared = SystemStatsManager()
-
+    
     /// Last CPU info for delta calculations
-    private var lastCPUTime: TimeInterval = Date().timeIntervalSince1970
-    private var lastCPUUsage: Double = 0
-
+    private var lastCPUInfo: host_cpu_load_info?
+    
     /// Private initializer for singleton pattern
     private init() {}
-
-    /// Get current memory statistics (simulated for iOS)
+    
+    /// Get current memory statistics
     public func getMemoryStats() -> MemoryStats {
-        // Get real device memory total
-        let physicalMemory = ProcessInfo.processInfo.physicalMemory
-
-        // Generate realistic simulated values
-        let appUsage = Float.random(in: 0.05...0.15) // 5-15% for app
-        let systemUsage = Float.random(in: 0.3...0.6) // 30-60% for system
-        let totalUsage = appUsage + systemUsage
-
-        let totalMemory = physicalMemory
-        let totalUsedMemory = UInt64(Float(totalMemory) * totalUsage)
-        let freeMemory = totalMemory - totalUsedMemory
-        let activeMemory = UInt64(Float(totalMemory) * (appUsage + 0.15))
-        let wiredMemory = UInt64(Float(totalMemory) * 0.2)
-        let inactiveMemory = UInt64(Float(totalMemory) * 0.1)
-        let compressedMemory = UInt64(Float(totalMemory) * 0.05)
-        #if os(iOS)
-        let appAvailableMemory = UInt64(os_proc_available_memory())
-        #else
-        let appAvailableMemory = freeMemory + inactiveMemory
-        #endif
-
+        let memInfo = getMemoryInfo()
+        
         return MemoryStats(
-            totalMemory: totalMemory,
-            freeMemory: freeMemory,
-            activeMemory: activeMemory,
-            inactiveMemory: inactiveMemory,
-            wiredMemory: wiredMemory,
-            compressedMemory: compressedMemory,
-            totalUsedMemory: totalUsedMemory,
-            appAvailableMemory: appAvailableMemory
+            totalMemory: memInfo.physicalMemory,
+            freeMemory: memInfo.free,
+            activeMemory: memInfo.active,
+            inactiveMemory: memInfo.inactive,
+            wiredMemory: memInfo.wired,
+            compressedMemory: memInfo.compressed,
+            totalUsedMemory: memInfo.totalUsed,
+            appAvailableMemory: UInt64(os_proc_available_memory())
         )
     }
-
-    /// Get current CPU statistics (simulated for iOS)
-    public func getCPUStats() -> CPUStats {
-        // Generate simulated CPU usage that varies over time
-        let currentTime = Date().timeIntervalSince1970
-        let elapsed = currentTime - self.lastCPUTime
-
-        // Create a somewhat realistic usage pattern
-        var newUsage = self.lastCPUUsage
-        if elapsed > 0.1 {
-            // Add some random variation to the usage
-            let change = Double.random(in: -10...10)
-            newUsage += change
-
-            // Ensure the value stays in a reasonable range
-            newUsage = max(5, min(newUsage, 85))
-
-            // Update the last values
-            self.lastCPUTime = currentTime
-            self.lastCPUUsage = newUsage
+    
+    /// Get memory info using host_statistics64
+    private func getMemoryInfo() -> (free: UInt64, active: UInt64, inactive: UInt64, wired: UInt64, compressed: UInt64, totalUsed: UInt64, physicalMemory: UInt64) {
+        var host_size = mach_msg_type_number_t(MemoryLayout<vm_statistics64_data_t>.size / MemoryLayout<integer_t>.stride)
+        var host_info = vm_statistics64_data_t()
+        let result = withUnsafeMutablePointer(to: &host_info) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(host_size)) {
+                host_statistics64(mach_host_self(), HOST_VM_INFO64, $0, &host_size)
+            }
         }
-
-        // Distribute the usage between user and system
-        let totalUsage = newUsage
-        let userRatio = Double.random(in: 0.6...0.8) // User processes use 60-80% of CPU
-        let userUsage = totalUsage * userRatio
-        let systemUsage = totalUsage * (1 - userRatio)
-        let idleUsage = 100 - totalUsage
-        let niceUsage = systemUsage * 0.1
-
+        
+        if result == KERN_SUCCESS {
+            // Get the page size in a concurrency-safe manner using getpagesize()
+            let pageSize = UInt64(getpagesize())
+            
+            // Calculate the basic memory statistics
+            let free = UInt64(host_info.free_count) * pageSize
+            let active = UInt64(host_info.active_count) * pageSize
+            let inactive = UInt64(host_info.inactive_count) * pageSize
+            let wired = UInt64(host_info.wire_count) * pageSize
+            let compressed = UInt64(host_info.compressor_page_count) * pageSize
+            let totalUsed = active + inactive + wired + compressed
+            
+            // Get physical memory size
+            let hostInfo = getHostBasicInfo()
+            let physicalMemory = hostInfo.max_mem
+            
+            return (free, active, inactive, wired, compressed, totalUsed, physicalMemory)
+        } else {
+            // Fallback to ProcessInfo if Mach calls fail
+            let physicalMemory = ProcessInfo.processInfo.physicalMemory
+            return (0, 0, 0, 0, 0, physicalMemory, physicalMemory)
+        }
+    }
+    
+    /// Get host basic info
+    private func getHostBasicInfo() -> host_basic_info {
+        var size = mach_msg_type_number_t(MemoryLayout<host_basic_info>.size / MemoryLayout<integer_t>.size)
+        let hostInfo = host_basic_info_t.allocate(capacity: 1)
+        
+        defer {
+            hostInfo.deallocate()
+        }
+        
+        var hostInfoData = host_basic_info()
+        
+        let result = withUnsafeMutablePointer(to: &hostInfoData) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: Int(size)) {
+                host_info(mach_host_self(), HOST_BASIC_INFO, $0, &size)
+            }
+        }
+        
+        if result == KERN_SUCCESS {
+            return hostInfoData
+        } else {
+            // Return default struct with zeros on error
+            return host_basic_info()
+        }
+    }
+    
+    /// Get current CPU statistics
+    public func getCPUStats() -> CPUStats {
+        guard let newInfo = hostCPULoadInfo()
+        else {
+            return CPUStats(
+                totalUsage: 0,
+                userUsage: 0,
+                systemUsage: 0,
+                idleUsage: 0,
+                niceUsage: 0,
+                activeProcessors: ProcessInfo.processInfo.activeProcessorCount,
+                totalProcessors: ProcessInfo.processInfo.processorCount
+            )
+        }
+        
+        // Default values
+        var cpuUsage: Double = 0
+        var userCPUUsage: Double = 0
+        var systemCPUUsage: Double = 0
+        var idleCPUUsage: Double = 0
+        var niceCPUUsage: Double = 0
+        
+        // Calculate CPU usage percentages if we have previous measurements
+        if let lastInfo = lastCPUInfo {
+            let userDiff = Double(newInfo.cpu_ticks.0 - lastInfo.cpu_ticks.0)
+            let systemDiff = Double(newInfo.cpu_ticks.1 - lastInfo.cpu_ticks.1)
+            let idleDiff = Double(newInfo.cpu_ticks.2 - lastInfo.cpu_ticks.2)
+            let niceDiff = Double(newInfo.cpu_ticks.3 - lastInfo.cpu_ticks.3)
+            
+            let totalDiff = userDiff + systemDiff + idleDiff + niceDiff
+            let nonIdleTicks = totalDiff - idleDiff
+            
+            if totalDiff > 0 {
+                cpuUsage = (nonIdleTicks / totalDiff) * 100
+                userCPUUsage = (userDiff / totalDiff) * 100
+                systemCPUUsage = (systemDiff / totalDiff) * 100
+                idleCPUUsage = (idleDiff / totalDiff) * 100
+                niceCPUUsage = (niceDiff / totalDiff) * 100
+            }
+        }
+        
+        // Update last info for the next calculation
+        lastCPUInfo = newInfo
+        
         return CPUStats(
-            totalUsage: totalUsage,
-            userUsage: userUsage,
-            systemUsage: systemUsage,
-            idleUsage: idleUsage,
-            niceUsage: niceUsage,
+            totalUsage: cpuUsage,
+            userUsage: userCPUUsage,
+            systemUsage: systemCPUUsage,
+            idleUsage: idleCPUUsage,
+            niceUsage: niceCPUUsage,
             activeProcessors: ProcessInfo.processInfo.activeProcessorCount,
             totalProcessors: ProcessInfo.processInfo.processorCount
         )
+    }
+    
+    /// Get CPU load info
+    private func hostCPULoadInfo() -> host_cpu_load_info? {
+        let HOST_CPU_LOAD_INFO_COUNT = MemoryLayout<host_cpu_load_info>.stride / MemoryLayout<integer_t>.stride
+        var size = mach_msg_type_number_t(HOST_CPU_LOAD_INFO_COUNT)
+        var cpuLoadInfo = host_cpu_load_info()
+        
+        let result = withUnsafeMutablePointer(to: &cpuLoadInfo) {
+            $0.withMemoryRebound(to: integer_t.self, capacity: HOST_CPU_LOAD_INFO_COUNT) {
+                host_statistics(mach_host_self(), HOST_CPU_LOAD_INFO, $0, &size)
+            }
+        }
+        
+        if result != KERN_SUCCESS {
+            return nil
+        }
+        
+        return cpuLoadInfo
     }
 
     /// Get current disk statistics
     public func getDiskStats() -> DiskStats {
         let fileManager = FileManager.default
-        do {
-            let attributes = try fileManager.attributesOfFileSystem(forPath: NSHomeDirectory() as String)
-            let freeSpace = attributes[.systemFreeSize] as? NSNumber
-            let totalSpace = attributes[.systemSize] as? NSNumber
-
-            if let freeSpace = freeSpace, let totalSpace = totalSpace {
-                let freeSpaceBytes = UInt64(truncating: freeSpace)
-                let totalSpaceBytes = UInt64(truncating: totalSpace)
-                let usedSpaceBytes = totalSpaceBytes - freeSpaceBytes
-
-                return DiskStats(
-                    totalSpace: totalSpaceBytes,
-                    usedSpace: usedSpaceBytes,
-                    freeSpace: freeSpaceBytes
-                )
-            }
-        } catch {
-            // If there's an error, return zeros
-        }
-
-        return DiskStats(totalSpace: 0, usedSpace: 0, freeSpace: 0)
+        guard let attributes = try? fileManager.attributesOfFileSystem(forPath: NSHomeDirectory() as String),
+              let freeSpace = attributes[.systemFreeSize] as? NSNumber,
+              let totalSpace = attributes[.systemSize] as? NSNumber
+        else { return DiskStats(totalSpace: 0, usedSpace: 0, freeSpace: 0) }
+        
+        let freeSpaceBytes = UInt64(truncating: freeSpace)
+        let totalSpaceBytes = UInt64(truncating: totalSpace)
+        let usedSpaceBytes = totalSpaceBytes - freeSpaceBytes
+        
+        return DiskStats(
+            totalSpace: totalSpaceBytes,
+            usedSpace: usedSpaceBytes,
+            freeSpace: freeSpaceBytes
+        )
     }
 
     /// Get current thermal state
@@ -213,21 +278,16 @@ public actor SystemStatsManager {
         ProcessInfo.processInfo.operatingSystemVersionString
     }
 
-    /// Get the battery level (iOS only)
+    /// Get the battery level
     @MainActor
     public func getBatteryLevel() -> Float {
-        #if canImport(UIKit)
         UIDevice.current.isBatteryMonitoringEnabled = true
         return UIDevice.current.batteryLevel
-        #else
-        return 1.0 // Default to 100% for non-iOS platforms
-        #endif
     }
 
-    /// Get the device type (iOS only)
+    /// Get the device type
     @MainActor
     public func getDeviceType() -> String {
-        #if canImport(UIKit)
         switch UIDevice.current.userInterfaceIdiom {
         case .unspecified:
             return "Unspecified"
@@ -244,8 +304,5 @@ public actor SystemStatsManager {
         default:
             return "Unknown"
         }
-        #else
-        return "Unknown"
-        #endif
     }
 }

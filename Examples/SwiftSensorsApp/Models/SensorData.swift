@@ -46,16 +46,24 @@ enum MemoryMetricType: Int, CaseIterable {
     case total = 0
     case free = 1
     case active = 2
-    case wired = 3
-    case used = 4
+    case inactive = 3
+    case wired = 4
+    case compressed = 5
+    case sum = 6
+    case appAvailable = 7
+    case appUnavailable = 8
 
     var name: String {
         switch self {
-        case .total: return "Total Memory"
-        case .free: return "Free Memory"
-        case .active: return "Active Memory"
-        case .wired: return "Wired Memory"
-        case .used: return "Used Memory"
+        case .total: return "Total Physical"
+        case .free: return "Free"
+        case .active: return "Active"
+        case .inactive: return "Inactive"
+        case .wired: return "Wired"
+        case .compressed: return "Compressed"
+        case .sum: return "Sum"
+        case .appAvailable: return "Available to App"
+        case .appUnavailable: return "Unavailable Remainder"
         }
     }
 }

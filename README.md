@@ -9,7 +9,7 @@ A Swift package for accessing device sensor data, including thermal sensors, mem
 - CPU usage statistics (total, user, system, idle)
 - Disk space information
 - System information (thermal state, uptime, OS version)
-- Battery information (iOS only)
+- Battery information
 - Formatted output for human-readable display
 
 ## Installation

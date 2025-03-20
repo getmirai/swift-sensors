@@ -223,12 +223,13 @@ class SensorsViewModel {
                 return (tempFormattedCurrents, newCurrentData)
             }
 
-            let memoryDataResults = await withTaskGroup(of: (formattedValue: String, sensorData: SensorData).self) { group in
+            // Process memory data using a task group to maintain concurrency safety
+            let memoryDataResults = await withTaskGroup(of: (index: Int, formattedValue: String, sensorData: SensorData).self) { group in
                 for type in MemoryMetricType.allCases {
                     group.addTask {
                         let value: Double
                         let formattedValue: String
-
+                        
                         switch type {
                         case .total:
                             value = Double(fetchedMemoryStats.totalMemory)
@@ -239,33 +240,49 @@ class SensorsViewModel {
                         case .active:
                             value = Double(fetchedMemoryStats.activeMemory)
                             formattedValue = await formatter.formatBytes(fetchedMemoryStats.activeMemory)
+                        case .inactive:
+                            value = Double(fetchedMemoryStats.inactiveMemory)
+                            formattedValue = await formatter.formatBytes(fetchedMemoryStats.inactiveMemory)
                         case .wired:
                             value = Double(fetchedMemoryStats.wiredMemory)
                             formattedValue = await formatter.formatBytes(fetchedMemoryStats.wiredMemory)
-                        case .used:
+                        case .compressed:
+                            value = Double(fetchedMemoryStats.compressedMemory)
+                            formattedValue = await formatter.formatBytes(fetchedMemoryStats.compressedMemory)
+                        case .sum:
                             value = Double(fetchedMemoryStats.totalUsedMemory)
                             formattedValue = await formatter.formatBytes(fetchedMemoryStats.totalUsedMemory)
+                        case .appAvailable:
+                            value = Double(fetchedMemoryStats.appAvailableMemory)
+                            formattedValue = await formatter.formatBytes(fetchedMemoryStats.appAvailableMemory)
+                        case .appUnavailable:
+                            let unavailable = fetchedMemoryStats.totalMemory - fetchedMemoryStats.appAvailableMemory
+                            value = Double(unavailable)
+                            formattedValue = await formatter.formatBytes(unavailable)
                         }
-
+                        
                         let sensorData = SensorData(
                             timestamp: now,
                             sensorName: type.name,
                             value: value,
                             category: "Memory"
                         )
-
-                        return (formattedValue, sensorData)
+                        
+                        // Return the index (enum raw value) along with the data for correct ordering
+                        return (type.rawValue, formattedValue, sensorData)
                     }
                 }
-
-                var tempFormattedMemoryValues: [String] = []
+                
+                // Prepare arrays with correct capacity
+                var tempFormattedMemoryValues = Array(repeating: "", count: MemoryMetricType.allCases.count)
                 var newMemoryData: [SensorData] = []
-
-                for await result in group {
-                    tempFormattedMemoryValues.append(result.formattedValue)
-                    newMemoryData.append(result.sensorData)
+                
+                // Collect results and store them in the correct order
+                for await (index, formattedValue, sensorData) in group {
+                    tempFormattedMemoryValues[index] = formattedValue
+                    newMemoryData.append(sensorData)
                 }
-
+                
                 return (tempFormattedMemoryValues, newMemoryData)
             }
 
