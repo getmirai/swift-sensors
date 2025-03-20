@@ -5,15 +5,15 @@ import SwiftUI
 struct InfoRow: View {
     /// The label shown on the left
     let label: String
-    
+
     /// The value shown on the right
     let value: String
-    
+
     var body: some View {
         HStack {
-            Text(label)
+            Text(self.label)
             Spacer()
-            Text(value)
+            Text(self.value)
         }
     }
 }

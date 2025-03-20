@@ -1,23 +1,23 @@
-import SwiftUI
 import SwiftSensors
+import SwiftUI
 
 /// Main content view for the app
 struct ContentView: View {
     /// Access the view model from the environment
     @Environment(\.sensorsViewModel) private var viewModel
-    
+
     /// Timer for regular updates
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-    
+
     /// Navigation path for controlling navigation stack
     @State private var navigationPath = NavigationPath()
-    
+
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack(path: self.$navigationPath) {
             List {
                 ForEach(SensorSection.allCases, id: \.self) { section in
                     Button {
-                        navigationPath.append(NavigationDestination.sectionDetail(section: section))
+                        self.navigationPath.append(NavigationDestination.sectionDetail(section: section))
                     } label: {
                         HStack {
                             Text(section.rawValue)
@@ -39,10 +39,10 @@ struct ContentView: View {
                 }
             }
             .onAppear {
-                viewModel.updateIfNeeded()
+                self.viewModel.updateIfNeeded()
             }
-            .onReceive(timer) { _ in
-                viewModel.updateIfNeeded()
+            .onReceive(self.timer) { _ in
+                self.viewModel.updateIfNeeded()
             }
         }
     }
@@ -52,136 +52,136 @@ struct ContentView: View {
 struct SectionDetailView: View {
     let section: SensorSection
     @Environment(\.sensorsViewModel) private var viewModel
-    
+
     /// Timer for regular updates
     let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-    
+
     var body: some View {
         VStack {
-            chartForSection
+            self.chartForSection
                 .frame(height: 220)
                 .padding()
             List {
-                sectionContent
+                self.sectionContent
             }
         }
-        .navigationTitle(section.rawValue)
+        .navigationTitle(self.section.rawValue)
         .onAppear {
-            viewModel.updateIfNeeded()
+            self.viewModel.updateIfNeeded()
         }
-        .onReceive(timer) { _ in
-            viewModel.updateIfNeeded()
+        .onReceive(self.timer) { _ in
+            self.viewModel.updateIfNeeded()
         }
     }
-    
+
     @ViewBuilder
     private var chartForSection: some View {
-        switch section {
+        switch self.section {
         case .thermal:
-            if viewModel.selectedThermalSensors.isEmpty {
+            if self.viewModel.selectedThermalSensors.isEmpty {
                 Text("Select sensors to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
                         // Ensure data is collected even when nothing is selected
-                        viewModel.updateIfNeeded()
+                        self.viewModel.updateIfNeeded()
                     }
             } else {
                 MultiSensorChart()
             }
-            
+
         case .voltage:
-            if viewModel.selectedVoltageSensors.isEmpty {
+            if self.viewModel.selectedVoltageSensors.isEmpty {
                 Text("Select sensors to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
                         // Ensure data is collected even when nothing is selected
-                        viewModel.updateIfNeeded()
+                        self.viewModel.updateIfNeeded()
                     }
             } else {
                 VoltageChart()
             }
-            
+
         case .current:
-            if viewModel.selectedCurrentSensors.isEmpty {
+            if self.viewModel.selectedCurrentSensors.isEmpty {
                 Text("Select sensors to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
                         // Ensure data is collected even when nothing is selected
-                        viewModel.updateIfNeeded()
+                        self.viewModel.updateIfNeeded()
                     }
             } else {
                 CurrentChart()
             }
-            
+
         case .memory:
-            if viewModel.selectedMemoryItems.isEmpty {
+            if self.viewModel.selectedMemoryItems.isEmpty {
                 Text("Select memory metrics to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
                         // Ensure data is collected even when nothing is selected
-                        viewModel.updateIfNeeded()
+                        self.viewModel.updateIfNeeded()
                     }
             } else {
                 MemoryChart()
             }
-            
+
         case .cpu:
-            if viewModel.selectedCPUItems.isEmpty {
+            if self.viewModel.selectedCPUItems.isEmpty {
                 Text("Select CPU metrics to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
                         // Ensure data is collected even when nothing is selected
-                        viewModel.updateIfNeeded()
+                        self.viewModel.updateIfNeeded()
                     }
             } else {
                 CPUChart()
             }
-            
+
         case .disk:
-            if viewModel.selectedDiskItems.isEmpty {
+            if self.viewModel.selectedDiskItems.isEmpty {
                 Text("Select disk metrics to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
                         // Ensure data is collected even when nothing is selected
-                        viewModel.updateIfNeeded()
+                        self.viewModel.updateIfNeeded()
                     }
             } else {
                 DiskChart()
             }
-            
+
         case .system:
             // System section doesn't have a chart
             Text("System Information")
                 .font(.headline)
         }
     }
-    
+
     @ViewBuilder
     private var sectionContent: some View {
-        switch section {
+        switch self.section {
         case .thermal:
-            ForEach(viewModel.thermalSensors, id: \.id) { sensor in
-                let isSelected = viewModel.selectedThermalSensors.contains(sensor.name)
+            ForEach(self.viewModel.thermalSensors, id: \.id) { sensor in
+                let isSelected = self.viewModel.selectedThermalSensors.contains(sensor.name)
                 Button {
                     if isSelected {
-                        viewModel.selectedThermalSensors.remove(sensor.name)
+                        self.viewModel.selectedThermalSensors.remove(sensor.name)
                     } else {
-                        viewModel.selectedThermalSensors.insert(sensor.name)
+                        self.viewModel.selectedThermalSensors.insert(sensor.name)
                     }
                 } label: {
                     HStack {
                         Text(sensor.name)
                         Spacer()
-                        Text(viewModel.thermalSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
-                            idx < viewModel.formattedTemperatures.count ? viewModel.formattedTemperatures[idx] : nil
+                        Text(self.viewModel.thermalSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
+                            idx < self.viewModel.formattedTemperatures.count ? self.viewModel.formattedTemperatures[idx] : nil
                         } ?? "\(sensor.temperature) °C")
-                        
+
                         if isSelected {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.blue)
@@ -190,24 +190,24 @@ struct SectionDetailView: View {
                     .foregroundColor(.primary)
                 }
             }
-            
+
         case .voltage:
-            ForEach(viewModel.voltageSensors, id: \.id) { sensor in
-                let isSelected = viewModel.selectedVoltageSensors.contains(sensor.name)
+            ForEach(self.viewModel.voltageSensors, id: \.id) { sensor in
+                let isSelected = self.viewModel.selectedVoltageSensors.contains(sensor.name)
                 Button {
                     if isSelected {
-                        viewModel.selectedVoltageSensors.remove(sensor.name)
+                        self.viewModel.selectedVoltageSensors.remove(sensor.name)
                     } else {
-                        viewModel.selectedVoltageSensors.insert(sensor.name)
+                        self.viewModel.selectedVoltageSensors.insert(sensor.name)
                     }
                 } label: {
                     HStack {
                         Text(sensor.name)
                         Spacer()
-                        Text(viewModel.voltageSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
-                            idx < viewModel.formattedVoltages.count ? viewModel.formattedVoltages[idx] : nil
+                        Text(self.viewModel.voltageSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
+                            idx < self.viewModel.formattedVoltages.count ? self.viewModel.formattedVoltages[idx] : nil
                         } ?? "\(sensor.voltage) V")
-                        
+
                         if isSelected {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.blue)
@@ -216,24 +216,24 @@ struct SectionDetailView: View {
                     .foregroundColor(.primary)
                 }
             }
-            
+
         case .current:
-            ForEach(viewModel.currentSensors, id: \.id) { sensor in
-                let isSelected = viewModel.selectedCurrentSensors.contains(sensor.name)
+            ForEach(self.viewModel.currentSensors, id: \.id) { sensor in
+                let isSelected = self.viewModel.selectedCurrentSensors.contains(sensor.name)
                 Button {
                     if isSelected {
-                        viewModel.selectedCurrentSensors.remove(sensor.name)
+                        self.viewModel.selectedCurrentSensors.remove(sensor.name)
                     } else {
-                        viewModel.selectedCurrentSensors.insert(sensor.name)
+                        self.viewModel.selectedCurrentSensors.insert(sensor.name)
                     }
                 } label: {
                     HStack {
                         Text(sensor.name)
                         Spacer()
-                        Text(viewModel.currentSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
-                            idx < viewModel.formattedCurrents.count ? viewModel.formattedCurrents[idx] : nil
+                        Text(self.viewModel.currentSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
+                            idx < self.viewModel.formattedCurrents.count ? self.viewModel.formattedCurrents[idx] : nil
                         } ?? "\(sensor.current) A")
-                        
+
                         if isSelected {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.blue)
@@ -242,27 +242,27 @@ struct SectionDetailView: View {
                     .foregroundColor(.primary)
                 }
             }
-            
+
         case .memory:
-            if viewModel.memoryStats != nil {
+            if self.viewModel.memoryStats != nil {
                 let labels = ["Total Memory", "Free Memory", "Active Memory", "Wired Memory", "Used Memory"]
-                
+
                 ForEach(0..<labels.count, id: \.self) { index in
-                    let isSelected = viewModel.selectedMemoryItems.contains(index)
+                    let isSelected = self.viewModel.selectedMemoryItems.contains(index)
                     Button {
                         if isSelected {
-                            viewModel.selectedMemoryItems.remove(index)
+                            self.viewModel.selectedMemoryItems.remove(index)
                         } else {
-                            viewModel.selectedMemoryItems.insert(index)
+                            self.viewModel.selectedMemoryItems.insert(index)
                         }
                     } label: {
                         HStack {
                             Text(labels[index])
                             Spacer()
-                            if index < viewModel.formattedMemoryValues.count {
-                                Text(viewModel.formattedMemoryValues[index])
+                            if index < self.viewModel.formattedMemoryValues.count {
+                                Text(self.viewModel.formattedMemoryValues[index])
                             }
-                            
+
                             if isSelected {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.blue)
@@ -276,27 +276,27 @@ struct SectionDetailView: View {
                     .foregroundColor(.gray)
                     .italic()
             }
-            
+
         case .cpu:
-            if viewModel.cpuStats != nil {
+            if self.viewModel.cpuStats != nil {
                 let labels = ["Total Usage", "User Usage", "System Usage"]
-                
+
                 ForEach(0..<labels.count, id: \.self) { index in
-                    let isSelected = viewModel.selectedCPUItems.contains(index)
+                    let isSelected = self.viewModel.selectedCPUItems.contains(index)
                     Button {
                         if isSelected {
-                            viewModel.selectedCPUItems.remove(index)
+                            self.viewModel.selectedCPUItems.remove(index)
                         } else {
-                            viewModel.selectedCPUItems.insert(index)
+                            self.viewModel.selectedCPUItems.insert(index)
                         }
                     } label: {
                         HStack {
                             Text(labels[index])
                             Spacer()
-                            if index < viewModel.formattedCPUValues.count {
-                                Text(viewModel.formattedCPUValues[index])
+                            if index < self.viewModel.formattedCPUValues.count {
+                                Text(self.viewModel.formattedCPUValues[index])
                             }
-                            
+
                             if isSelected {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.blue)
@@ -310,27 +310,27 @@ struct SectionDetailView: View {
                     .foregroundColor(.gray)
                     .italic()
             }
-            
+
         case .disk:
-            if viewModel.diskStats != nil {
+            if self.viewModel.diskStats != nil {
                 let labels = ["Total Space", "Used Space", "Free Space"]
-                
+
                 ForEach(0..<labels.count, id: \.self) { index in
-                    let isSelected = viewModel.selectedDiskItems.contains(index)
+                    let isSelected = self.viewModel.selectedDiskItems.contains(index)
                     Button {
                         if isSelected {
-                            viewModel.selectedDiskItems.remove(index)
+                            self.viewModel.selectedDiskItems.remove(index)
                         } else {
-                            viewModel.selectedDiskItems.insert(index)
+                            self.viewModel.selectedDiskItems.insert(index)
                         }
                     } label: {
                         HStack {
                             Text(labels[index])
                             Spacer()
-                            if index < viewModel.formattedDiskValues.count {
-                                Text(viewModel.formattedDiskValues[index])
+                            if index < self.viewModel.formattedDiskValues.count {
+                                Text(self.viewModel.formattedDiskValues[index])
                             }
-                            
+
                             if isSelected {
                                 Image(systemName: "checkmark")
                                     .foregroundColor(.blue)
@@ -344,16 +344,16 @@ struct SectionDetailView: View {
                     .foregroundColor(.gray)
                     .italic()
             }
-            
+
         case .system:
             // System items are not selectable, just display information
             let items = [
                 ("Thermal State", viewModel.thermalState.rawValue),
-                ("Uptime", viewModel.uptimeText),
+                ("Uptime", self.viewModel.uptimeText),
                 ("Device Type", ProcessInfo.processInfo.isiOSAppOnMac ? "Mac" : "iOS Device"),
                 ("OS Version", ProcessInfo.processInfo.operatingSystemVersionString)
             ]
-            
+
             ForEach(0..<items.count, id: \.self) { index in
                 HStack {
                     Text(items[index].0)

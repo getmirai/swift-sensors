@@ -5,16 +5,16 @@ import SwiftUI
 struct StatBox: View {
     /// The title shown above the value
     let title: String
-    
+
     /// The formatted value to display
     let value: String
-    
+
     var body: some View {
         VStack {
-            Text(title)
+            Text(self.title)
                 .font(.caption)
                 .foregroundColor(.secondary)
-            Text(value)
+            Text(self.value)
                 .font(.headline)
         }
         .frame(minWidth: 80)

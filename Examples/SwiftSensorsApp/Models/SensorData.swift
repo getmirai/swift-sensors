@@ -4,33 +4,33 @@ import Foundation
 struct SensorData: Identifiable, Equatable {
     /// Unique identifier
     let id = UUID()
-    
+
     /// When the reading was taken
     let timestamp: Date
-    
+
     /// Name of the sensor
     let sensorName: String
-    
+
     /// Value of the reading
     let value: Double
-    
+
     /// Category of the reading (optional)
     let category: String?
-    
+
     init(timestamp: Date, sensorName: String, value: Double, category: String? = nil) {
         self.timestamp = timestamp
         self.sensorName = sensorName
         self.value = value
         self.category = category
     }
-    
+
     // Implementation of Equatable
     static func == (lhs: SensorData, rhs: SensorData) -> Bool {
-        return lhs.id == rhs.id &&
-               lhs.timestamp == rhs.timestamp &&
-               lhs.sensorName == rhs.sensorName &&
-               lhs.value == rhs.value &&
-               lhs.category == rhs.category
+        lhs.id == rhs.id &&
+            lhs.timestamp == rhs.timestamp &&
+            lhs.sensorName == rhs.sensorName &&
+            lhs.value == rhs.value &&
+            lhs.category == rhs.category
     }
 }
 
@@ -48,7 +48,7 @@ enum MemoryMetricType: Int, CaseIterable {
     case active = 2
     case wired = 3
     case used = 4
-    
+
     var name: String {
         switch self {
         case .total: return "Total Memory"
@@ -65,7 +65,7 @@ enum CPUMetricType: Int, CaseIterable {
     case total = 0
     case user = 1
     case system = 2
-    
+
     var name: String {
         switch self {
         case .total: return "Total Usage"
@@ -80,7 +80,7 @@ enum DiskMetricType: Int, CaseIterable {
     case total = 0
     case used = 1
     case free = 2
-    
+
     var name: String {
         switch self {
         case .total: return "Total Space"

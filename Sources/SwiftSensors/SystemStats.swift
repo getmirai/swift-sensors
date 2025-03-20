@@ -65,24 +65,24 @@ public enum ThermalState: String, Sendable {
 public actor SystemStatsManager {
     /// Shared instance for easy access
     public static let shared = SystemStatsManager()
-    
+
     /// Last CPU info for delta calculations
     private var lastCPUTime: TimeInterval = Date().timeIntervalSince1970
     private var lastCPUUsage: Double = 0
-    
+
     /// Private initializer for singleton pattern
     private init() {}
-    
+
     /// Get current memory statistics (simulated for iOS)
     public func getMemoryStats() -> MemoryStats {
         // Get real device memory total
         let physicalMemory = ProcessInfo.processInfo.physicalMemory
-        
+
         // Generate realistic simulated values
         let appUsage = Float.random(in: 0.05...0.15) // 5-15% for app
         let systemUsage = Float.random(in: 0.3...0.6) // 30-60% for system
         let totalUsage = appUsage + systemUsage
-        
+
         let totalMemory = physicalMemory
         let totalUsedMemory = UInt64(Float(totalMemory) * totalUsage)
         let freeMemory = totalMemory - totalUsedMemory
@@ -95,7 +95,7 @@ public actor SystemStatsManager {
         #else
         let appAvailableMemory = freeMemory + inactiveMemory
         #endif
-        
+
         return MemoryStats(
             totalMemory: totalMemory,
             freeMemory: freeMemory,
@@ -107,28 +107,28 @@ public actor SystemStatsManager {
             appAvailableMemory: appAvailableMemory
         )
     }
-    
+
     /// Get current CPU statistics (simulated for iOS)
     public func getCPUStats() -> CPUStats {
         // Generate simulated CPU usage that varies over time
         let currentTime = Date().timeIntervalSince1970
-        let elapsed = currentTime - lastCPUTime
-        
+        let elapsed = currentTime - self.lastCPUTime
+
         // Create a somewhat realistic usage pattern
-        var newUsage = lastCPUUsage
+        var newUsage = self.lastCPUUsage
         if elapsed > 0.1 {
             // Add some random variation to the usage
             let change = Double.random(in: -10...10)
             newUsage += change
-            
+
             // Ensure the value stays in a reasonable range
             newUsage = max(5, min(newUsage, 85))
-            
+
             // Update the last values
-            lastCPUTime = currentTime
-            lastCPUUsage = newUsage
+            self.lastCPUTime = currentTime
+            self.lastCPUUsage = newUsage
         }
-        
+
         // Distribute the usage between user and system
         let totalUsage = newUsage
         let userRatio = Double.random(in: 0.6...0.8) // User processes use 60-80% of CPU
@@ -136,7 +136,7 @@ public actor SystemStatsManager {
         let systemUsage = totalUsage * (1 - userRatio)
         let idleUsage = 100 - totalUsage
         let niceUsage = systemUsage * 0.1
-        
+
         return CPUStats(
             totalUsage: totalUsage,
             userUsage: userUsage,
@@ -147,7 +147,7 @@ public actor SystemStatsManager {
             totalProcessors: ProcessInfo.processInfo.processorCount
         )
     }
-    
+
     /// Get current disk statistics
     public func getDiskStats() -> DiskStats {
         let fileManager = FileManager.default
@@ -155,12 +155,12 @@ public actor SystemStatsManager {
             let attributes = try fileManager.attributesOfFileSystem(forPath: NSHomeDirectory() as String)
             let freeSpace = attributes[.systemFreeSize] as? NSNumber
             let totalSpace = attributes[.systemSize] as? NSNumber
-            
+
             if let freeSpace = freeSpace, let totalSpace = totalSpace {
                 let freeSpaceBytes = UInt64(truncating: freeSpace)
                 let totalSpaceBytes = UInt64(truncating: totalSpace)
                 let usedSpaceBytes = totalSpaceBytes - freeSpaceBytes
-                
+
                 return DiskStats(
                     totalSpace: totalSpaceBytes,
                     usedSpace: usedSpaceBytes,
@@ -170,10 +170,10 @@ public actor SystemStatsManager {
         } catch {
             // If there's an error, return zeros
         }
-        
+
         return DiskStats(totalSpace: 0, usedSpace: 0, freeSpace: 0)
     }
-    
+
     /// Get current thermal state
     public func getThermalState() -> ThermalState {
         let thermalStatus = ProcessInfo.processInfo.thermalState
@@ -190,29 +190,29 @@ public actor SystemStatsManager {
             return .unknown
         }
     }
-    
+
     /// Get system uptime in seconds
     public func getSystemUptime() -> TimeInterval {
-        return ProcessInfo.processInfo.systemUptime
+        ProcessInfo.processInfo.systemUptime
     }
-    
+
     /// Format uptime into a readable string
     public func getFormattedUptime() -> String {
-        let uptime = getSystemUptime()
+        let uptime = self.getSystemUptime()
         let formatter = DateComponentsFormatter()
         formatter.unitsStyle = .abbreviated
         formatter.allowedUnits = [.day, .hour, .minute, .second]
-        
+
         let uptimeDate = Date(timeIntervalSinceNow: -uptime)
         let formattedUptime = formatter.string(from: uptimeDate, to: Date()) ?? "Unknown"
         return formattedUptime
     }
-    
+
     /// Get the OS version
     public func getOSVersion() -> String {
-        return ProcessInfo.processInfo.operatingSystemVersionString
+        ProcessInfo.processInfo.operatingSystemVersionString
     }
-    
+
     /// Get the battery level (iOS only)
     @MainActor
     public func getBatteryLevel() -> Float {
@@ -223,7 +223,7 @@ public actor SystemStatsManager {
         return 1.0 // Default to 100% for non-iOS platforms
         #endif
     }
-    
+
     /// Get the device type (iOS only)
     @MainActor
     public func getDeviceType() -> String {

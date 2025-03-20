@@ -1,27 +1,27 @@
-import SwiftUI
 import Charts
 import SwiftSensors
+import SwiftUI
 
 /// Chart display for memory metrics using the unified model
 struct MemoryChart: View {
     /// Access the view model from the environment
     @Environment(\.sensorsViewModel) private var viewModel
-    
+
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
-    
+
     var body: some View {
         BaseChartView(
-            data: viewModel.filteredMemoryData(timeWindow: timeWindow),
+            data: self.viewModel.filteredMemoryData(timeWindow: self.timeWindow),
             yAxisTitle: "Memory",
-            formatYValue: { formatBytes(UInt64($0)) },
-            timeWindow: $timeWindow
+            formatYValue: { self.formatBytes(UInt64($0)) },
+            timeWindow: self.$timeWindow
         )
         .onAppear {
-            viewModel.updateIfNeeded()
+            self.viewModel.updateIfNeeded()
         }
     }
-    
+
     /// Format bytes to human-readable string
     private func formatBytes(_ bytes: UInt64) -> String {
         let formatter = ByteCountFormatter()
@@ -35,20 +35,20 @@ struct MemoryChart: View {
 struct CPUChart: View {
     /// Access the view model from the environment
     @Environment(\.sensorsViewModel) private var viewModel
-    
+
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
-    
+
     var body: some View {
         BaseChartView(
-            data: viewModel.filteredCPUData(timeWindow: timeWindow),
+            data: self.viewModel.filteredCPUData(timeWindow: self.timeWindow),
             yAxisTitle: "CPU Usage",
             formatYValue: { "\(Int($0))%" },
-            timeWindow: $timeWindow
+            timeWindow: self.$timeWindow
         )
         .chartYScale(domain: 0...100) // CPU usage is 0-100%
         .onAppear {
-            viewModel.updateIfNeeded()
+            self.viewModel.updateIfNeeded()
         }
     }
 }
@@ -57,22 +57,22 @@ struct CPUChart: View {
 struct DiskChart: View {
     /// Access the view model from the environment
     @Environment(\.sensorsViewModel) private var viewModel
-    
+
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
-    
+
     var body: some View {
         BaseChartView(
-            data: viewModel.filteredDiskData(timeWindow: timeWindow),
+            data: self.viewModel.filteredDiskData(timeWindow: self.timeWindow),
             yAxisTitle: "Disk Space",
-            formatYValue: { formatBytes(UInt64($0)) },
-            timeWindow: $timeWindow
+            formatYValue: { self.formatBytes(UInt64($0)) },
+            timeWindow: self.$timeWindow
         )
         .onAppear {
-            viewModel.updateIfNeeded()
+            self.viewModel.updateIfNeeded()
         }
     }
-    
+
     /// Format bytes to human-readable string
     private func formatBytes(_ bytes: UInt64) -> String {
         let formatter = ByteCountFormatter()

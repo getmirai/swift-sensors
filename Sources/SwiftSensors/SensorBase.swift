@@ -1,5 +1,5 @@
-@preconcurrency import Foundation
 @preconcurrency import CoreFoundation
+@preconcurrency import Foundation
 import PrivateAPI
 
 // For CF functions
@@ -17,7 +17,7 @@ public protocol BaseSensor: Identifiable, Sendable {
 public protocol SensorManager {
     associatedtype SensorType: BaseSensor
     static var shared: Self { get }
-    
+
     /// Get all available sensors from this manager
     func getAllSensors() async -> [SensorType]
 }
@@ -31,12 +31,12 @@ public enum SensorUtils {
             "PrimaryUsage": usage
         ] as CFDictionary
     }
-    
+
     /// Calculate event field base for a given type
     public static func eventFieldBase(_ type: Int32) -> Int32 {
-        return type << 16
+        type << 16
     }
-    
+
     /// Get HID service clients matching a specific query
     public static func getEntries(matching query: CFDictionary) -> [IOHIDServiceClient] {
         guard let system = IOHIDEventSystemClientCreate(kCFAllocatorDefault) else {
@@ -46,15 +46,15 @@ public enum SensorUtils {
         guard let matchingServicesUnmanaged = IOHIDEventSystemClientCopyServices(system) else {
             return []
         }
-        
+
         // Need to convert Unmanaged<CFArray> to CFArray
         let matchingServices = matchingServicesUnmanaged.takeRetainedValue()
-        
+
         // CFArrayGetCount and CFArrayGetValueAtIndex are C functions
         // that we need to use for safety
         let count = CFArrayGetCount(matchingServices)
         var services = [IOHIDServiceClient]()
-        
+
         for i in 0..<count {
             if let service = CFArrayGetValueAtIndex(matchingServices, i) {
                 // Convert the void pointer to an IOHIDServiceClient (OpaquePointer)
@@ -62,13 +62,13 @@ public enum SensorUtils {
                 services.append(client)
             }
         }
-        
+
         return services
     }
-    
+
     /// Create name to service mapping with validation
     public static func createNameDictionary(
-        of entries: [IOHIDServiceClient], 
+        of entries: [IOHIDServiceClient],
         valueValidator: (IOHIDServiceClient) -> Bool
     ) -> [String: IOHIDServiceClient] {
         let keyValuePairs = entries.compactMap { client -> (String, IOHIDServiceClient)? in
@@ -78,7 +78,7 @@ public enum SensorUtils {
         }
         return Dictionary(keyValuePairs) { left, right in left }
     }
-    
+
     /// Extract sensor values from the name dictionary
     public static func getSensorValues<T>(
         from dictionary: [String: IOHIDServiceClient],
@@ -101,7 +101,7 @@ extension IOHIDServiceClient {
         let cfString = unsafeBitCast(propUnmanaged, to: CFString.self)
         return cfString as String
     }
-    
+
     func getValue(forEventType eventType: Int64, fieldBase: Int32) -> Double? {
         guard let event = IOHIDServiceClientCopyEvent(self, eventType, 0, 0) else {
             return nil

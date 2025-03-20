@@ -1,28 +1,28 @@
-import SwiftUI
 import Charts
 import SwiftSensors
+import SwiftUI
 
 /// A generic base chart for displaying sensor data
 struct BaseChartView: View {
     /// Data to display on the chart
     let data: [SensorData]
-    
+
     /// Title for the Y-axis
     let yAxisTitle: String
-    
+
     /// Function to format Y-axis values
     let formatYValue: (Double) -> String
-    
+
     /// Time window to display
     @Binding var timeWindow: TimeInterval
-    
+
     var body: some View {
         VStack {
-            if !data.isEmpty {
-                Chart(data) { reading in
+            if !self.data.isEmpty {
+                Chart(self.data) { reading in
                     LineMark(
                         x: .value("Time", reading.timestamp),
-                        y: .value(yAxisTitle, reading.value)
+                        y: .value(self.yAxisTitle, reading.value)
                     )
                     .foregroundStyle(by: .value("Sensor", reading.sensorName))
                 }
@@ -33,7 +33,7 @@ struct BaseChartView: View {
                     AxisMarks(position: .leading) { value in
                         AxisValueLabel {
                             if let val = value.as(Double.self) {
-                                Text(formatYValue(val))
+                                Text(self.formatYValue(val))
                             }
                         }
                     }
@@ -41,8 +41,8 @@ struct BaseChartView: View {
             } else {
                 Text("Collecting data...")
             }
-            
-            TimeWindowPicker(timeWindow: $timeWindow)
+
+            TimeWindowPicker(timeWindow: self.$timeWindow)
         }
     }
 }
@@ -51,19 +51,19 @@ struct BaseChartView: View {
 struct MultiSensorChart: View {
     /// Access the view model from the environment
     @Environment(\.sensorsViewModel) private var viewModel
-    
+
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
-    
+
     var body: some View {
         BaseChartView(
-            data: viewModel.filteredThermalData(timeWindow: timeWindow),
+            data: self.viewModel.filteredThermalData(timeWindow: self.timeWindow),
             yAxisTitle: "Temperature",
             formatYValue: { "\(Int($0))°C" },
-            timeWindow: $timeWindow
+            timeWindow: self.$timeWindow
         )
         .onAppear {
-            viewModel.updateIfNeeded()
+            self.viewModel.updateIfNeeded()
         }
     }
 }
@@ -72,19 +72,19 @@ struct MultiSensorChart: View {
 struct VoltageChart: View {
     /// Access the view model from the environment
     @Environment(\.sensorsViewModel) private var viewModel
-    
+
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
-    
+
     var body: some View {
         BaseChartView(
-            data: viewModel.filteredVoltageData(timeWindow: timeWindow),
+            data: self.viewModel.filteredVoltageData(timeWindow: self.timeWindow),
             yAxisTitle: "Voltage",
             formatYValue: { String(format: "%.2f V", $0) },
-            timeWindow: $timeWindow
+            timeWindow: self.$timeWindow
         )
         .onAppear {
-            viewModel.updateIfNeeded()
+            self.viewModel.updateIfNeeded()
         }
     }
 }
@@ -93,13 +93,13 @@ struct VoltageChart: View {
 struct CurrentChart: View {
     /// Access the view model from the environment
     @Environment(\.sensorsViewModel) private var viewModel
-    
+
     /// Time window to display
     @State private var timeWindow: TimeInterval = 60 // 60 seconds by default
-    
+
     var body: some View {
         BaseChartView(
-            data: viewModel.filteredCurrentData(timeWindow: timeWindow),
+            data: self.viewModel.filteredCurrentData(timeWindow: self.timeWindow),
             yAxisTitle: "Current",
             formatYValue: { current in
                 if abs(current) < 0.001 {
@@ -110,10 +110,10 @@ struct CurrentChart: View {
                     return String(format: "%.2f A", current)
                 }
             },
-            timeWindow: $timeWindow
+            timeWindow: self.$timeWindow
         )
         .onAppear {
-            viewModel.updateIfNeeded()
+            self.viewModel.updateIfNeeded()
         }
     }
 }

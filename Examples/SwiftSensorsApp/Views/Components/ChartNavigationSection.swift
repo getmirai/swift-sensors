@@ -5,22 +5,22 @@ import SwiftUI
 struct ChartNavigationSection: View {
     /// Action for temperature charts
     var onTemperatureChartsSelected: () -> Void
-    
+
     /// Action for power charts
     var onPowerChartsSelected: () -> Void
-    
+
     var body: some View {
         Section {
             Button {
-                onTemperatureChartsSelected()
+                self.onTemperatureChartsSelected()
             } label: {
                 Text("View Temperature Charts")
                     .font(.headline)
                     .foregroundColor(.blue)
             }
-            
+
             Button {
-                onPowerChartsSelected()
+                self.onPowerChartsSelected()
             } label: {
                 Text("View Power Charts")
                     .font(.headline)

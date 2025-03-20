@@ -4,7 +4,7 @@ import Foundation
 enum NavigationDestination: Hashable {
     /// Detail view for a specific sensor
     case sensorDetail(sensorName: String)
-    
+
     /// Specific section detail+chart view
     case sectionDetail(section: SensorSection)
 }

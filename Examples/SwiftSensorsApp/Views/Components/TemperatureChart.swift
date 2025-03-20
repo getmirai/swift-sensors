@@ -1,15 +1,15 @@
-import SwiftUI
 import Charts
+import SwiftUI
 
 /// Chart component for temperature readings
 
 struct TemperatureChart: View {
     /// The store containing temperature readings
     let store: SensorReadingsStore
-    
+
     var body: some View {
         Chart {
-            ForEach(store.readings) { reading in
+            ForEach(self.store.readings) { reading in
                 LineMark(
                     x: .value("Time", reading.timestamp),
                     y: .value("Temperature", reading.temperature)
@@ -17,8 +17,8 @@ struct TemperatureChart: View {
                 .foregroundStyle(Color.blue)
                 .interpolationMethod(.catmullRom)
             }
-            
-            RuleMark(y: .value("Average", store.avgTemperature))
+
+            RuleMark(y: .value("Average", self.store.avgTemperature))
                 .foregroundStyle(Color.gray.opacity(0.5))
                 .lineStyle(StrokeStyle(lineWidth: 1, dash: [5, 5]))
                 .annotation(position: .trailing) {
@@ -27,7 +27,7 @@ struct TemperatureChart: View {
                         .foregroundColor(.gray)
                 }
         }
-        .chartYScale(domain: max(0.1, store.minTemperature-1)...max(1, store.maxTemperature+1))
+        .chartYScale(domain: max(0.1, self.store.minTemperature-1)...max(1, self.store.maxTemperature+1))
         .chartXAxis {
             AxisMarks(position: .bottom)
         }
