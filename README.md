@@ -63,10 +63,10 @@ print("System Uptime: \(await sensors.getFormattedUptime())")
 - iOS 16.0+
 - Swift 6.0+
 
-## Note on Thermal Sensors
+## Note on Private APIs
 
-The thermal sensor functionality uses private APIs to access internal device temperature sensors. While this works well for development and diagnostic purposes, be aware that using private APIs may not be acceptable for App Store submissions.
+This package uses private APIs to access internal device sensors including thermal, voltage, and current readings. While this works well for development and diagnostic purposes, be aware that using private APIs may not be acceptable for App Store submissions.
 
 ## License
 
-This project is available under the MIT license. See the LICENSE file for more info.
+This project is available under the MIT license. See the [LICENSE](LICENSE) file for more info.
