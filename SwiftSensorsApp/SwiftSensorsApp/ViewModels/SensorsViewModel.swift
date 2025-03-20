@@ -21,6 +21,15 @@ import SwiftSensors
     var formattedCPUValues: [String] = []
     var formattedDiskValues: [String] = []
     
+    // Selected sensors for charts
+    var selectedThermalSensors: Set<String> = []
+    var selectedVoltageSensors: Set<String> = []
+    var selectedCurrentSensors: Set<String> = []
+    var selectedMemoryItems: Set<Int> = []
+    var selectedCPUItems: Set<Int> = []
+    var selectedDiskItems: Set<Int> = []
+    var selectedSystemItem: Int? = nil
+    
     // Cache to ensure sensor readings persist across UI updates
     private var lastUpdateTime = Date.distantPast
     private let updateInterval: TimeInterval = 1.0
