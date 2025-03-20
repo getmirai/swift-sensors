@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a single sensor reading for display in charts
-struct SensorData: Identifiable {
+struct SensorData: Identifiable, Equatable {
     /// Unique identifier
     let id = UUID()
     
@@ -22,6 +22,15 @@ struct SensorData: Identifiable {
         self.sensorName = sensorName
         self.value = value
         self.category = category
+    }
+    
+    // Implementation of Equatable
+    static func == (lhs: SensorData, rhs: SensorData) -> Bool {
+        return lhs.id == rhs.id &&
+               lhs.timestamp == rhs.timestamp &&
+               lhs.sensorName == rhs.sensorName &&
+               lhs.value == rhs.value &&
+               lhs.category == rhs.category
     }
 }
 

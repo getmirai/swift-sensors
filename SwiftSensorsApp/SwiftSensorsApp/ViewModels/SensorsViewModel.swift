@@ -122,10 +122,9 @@ import SwiftSensors
     
     /// Fetches fresh sensor data from all sources
     func updateSensorData() {
-        let sensors = SwiftSensors.shared
-        
-        // Use Task for async calls
-        Task {
+        Task.detached { [formatter] in
+            let sensors = SwiftSensors.shared
+            
             // Create temporary variables to hold fetched data
             let fetchedThermalSensors = await sensors.getThermalSensors()
             let fetchedVoltageSensors = await sensors.getVoltageSensors()
@@ -137,193 +136,274 @@ import SwiftSensors
             let fetchedUptimeText = await sensors.getFormattedUptime()
             let now = Date()
             
-            // Format all values first
-            var tempFormattedTemperatures: [String] = []
-            var tempFormattedVoltages: [String] = []
-            var tempFormattedCurrents: [String] = []
-            
-            // Create temporary data points
-            var newThermalData: [SensorData] = []
-            var newVoltageData: [SensorData] = []
-            var newCurrentData: [SensorData] = []
-            var newMemoryData: [SensorData] = []
-            var newCPUData: [SensorData] = []
-            var newDiskData: [SensorData] = []
-            
-            // Temperature formatting and data collection
-            for sensor in fetchedThermalSensors {
-                tempFormattedTemperatures.append(await formatter.formatTemperature(sensor.temperature))
-                newThermalData.append(SensorData(
-                    timestamp: now,
-                    sensorName: sensor.name,
-                    value: sensor.temperature,
-                    category: "Temperature"
-                ))
-            }
-            
-            // Voltage formatting and data collection
-            for sensor in fetchedVoltageSensors {
-                tempFormattedVoltages.append(await formatter.formatVoltage(sensor.voltage))
-                newVoltageData.append(SensorData(
-                    timestamp: now,
-                    sensorName: sensor.name,
-                    value: sensor.voltage,
-                    category: "Voltage"
-                ))
-            }
-            
-            // Current formatting and data collection
-            for sensor in fetchedCurrentSensors {
-                tempFormattedCurrents.append(await formatter.formatCurrent(sensor.current))
-                newCurrentData.append(SensorData(
-                    timestamp: now,
-                    sensorName: sensor.name,
-                    value: sensor.current,
-                    category: "Current"
-                ))
-            }
-            
-            // Memory formatting and data collection
-            var tempFormattedMemoryValues: [String] = []
-            
-            // Add data points for each memory metric
-            for type in MemoryMetricType.allCases {
-                let value: Double
-                switch type {
-                case .total: value = Double(fetchedMemoryStats.totalMemory)
-                case .free: value = Double(fetchedMemoryStats.freeMemory)
-                case .active: value = Double(fetchedMemoryStats.activeMemory)
-                case .wired: value = Double(fetchedMemoryStats.wiredMemory)
-                case .used: value = Double(fetchedMemoryStats.totalUsedMemory)
+            let thermalDataResults = await withTaskGroup(of: (formattedTemp: String, sensorData: SensorData).self) { group in
+                for sensor in fetchedThermalSensors {
+                    group.addTask {
+                        let formattedTemp = await formatter.formatTemperature(sensor.temperature)
+                        let sensorData = SensorData(
+                            timestamp: now,
+                            sensorName: sensor.name,
+                            value: sensor.temperature,
+                            category: "Temperature"
+                        )
+                        return (formattedTemp, sensorData)
+                    }
                 }
                 
-                newMemoryData.append(SensorData(
-                    timestamp: now,
-                    sensorName: type.name,
-                    value: value,
-                    category: "Memory"
-                ))
-            }
-            
-            tempFormattedMemoryValues = [
-                await formatter.formatBytes(fetchedMemoryStats.totalMemory),
-                await formatter.formatBytes(fetchedMemoryStats.freeMemory),
-                await formatter.formatBytes(fetchedMemoryStats.activeMemory),
-                await formatter.formatBytes(fetchedMemoryStats.wiredMemory),
-                await formatter.formatBytes(fetchedMemoryStats.totalUsedMemory)
-            ]
-            
-            // CPU formatting and data collection
-            var tempFormattedCPUValues: [String] = []
-            
-            // Add data points for each CPU metric
-            for type in CPUMetricType.allCases {
-                let value: Double
-                switch type {
-                case .total: value = fetchedCPUStats.totalUsage
-                case .user: value = fetchedCPUStats.userUsage
-                case .system: value = fetchedCPUStats.systemUsage
+                var tempFormattedTemperatures: [String] = []
+                var newThermalData: [SensorData] = []
+                
+                for await result in group {
+                    tempFormattedTemperatures.append(result.formattedTemp)
+                    newThermalData.append(result.sensorData)
                 }
                 
-                newCPUData.append(SensorData(
-                    timestamp: now,
-                    sensorName: type.name,
-                    value: value,
-                    category: "CPU"
-                ))
+                return (tempFormattedTemperatures, newThermalData)
             }
             
-            tempFormattedCPUValues = [
-                await formatter.formatPercentage(fetchedCPUStats.totalUsage),
-                await formatter.formatPercentage(fetchedCPUStats.userUsage),
-                await formatter.formatPercentage(fetchedCPUStats.systemUsage)
-            ]
-            
-            // Disk formatting and data collection
-            var tempFormattedDiskValues: [String] = []
-            
-            // Add data points for each disk metric
-            for type in DiskMetricType.allCases {
-                let value: Double
-                switch type {
-                case .total: value = Double(fetchedDiskStats.totalSpace)
-                case .used: value = Double(fetchedDiskStats.usedSpace)
-                case .free: value = Double(fetchedDiskStats.freeSpace)
+            let voltageDataResults = await withTaskGroup(of: (formattedVoltage: String, sensorData: SensorData).self) { group in
+                for sensor in fetchedVoltageSensors {
+                    group.addTask {
+                        let formattedVoltage = await formatter.formatVoltage(sensor.voltage)
+                        let sensorData = SensorData(
+                            timestamp: now,
+                            sensorName: sensor.name,
+                            value: sensor.voltage,
+                            category: "Voltage"
+                        )
+                        return (formattedVoltage, sensorData)
+                    }
                 }
                 
-                newDiskData.append(SensorData(
-                    timestamp: now,
-                    sensorName: type.name,
-                    value: value,
-                    category: "Disk"
-                ))
+                var tempFormattedVoltages: [String] = []
+                var newVoltageData: [SensorData] = []
+                
+                for await result in group {
+                    tempFormattedVoltages.append(result.formattedVoltage)
+                    newVoltageData.append(result.sensorData)
+                }
+                
+                return (tempFormattedVoltages, newVoltageData)
             }
             
-            tempFormattedDiskValues = [
-                await formatter.formatBytes(fetchedDiskStats.totalSpace),
-                await formatter.formatBytes(fetchedDiskStats.usedSpace),
-                await formatter.formatBytes(fetchedDiskStats.freeSpace)
-            ]
+            let currentDataResults = await withTaskGroup(of: (formattedCurrent: String, sensorData: SensorData).self) { group in
+                for sensor in fetchedCurrentSensors {
+                    group.addTask {
+                        let formattedCurrent = await formatter.formatCurrent(sensor.current)
+                        let sensorData = SensorData(
+                            timestamp: now,
+                            sensorName: sensor.name,
+                            value: sensor.current,
+                            category: "Current"
+                        )
+                        return (formattedCurrent, sensorData)
+                    }
+                }
+                
+                var tempFormattedCurrents: [String] = []
+                var newCurrentData: [SensorData] = []
+                
+                for await result in group {
+                    tempFormattedCurrents.append(result.formattedCurrent)
+                    newCurrentData.append(result.sensorData)
+                }
+                
+                return (tempFormattedCurrents, newCurrentData)
+            }
             
-            // Update UI on the main thread with all data at once
+            let memoryDataResults = await withTaskGroup(of: (formattedValue: String, sensorData: SensorData).self) { group in
+                for type in MemoryMetricType.allCases {
+                    group.addTask {
+                        let value: Double
+                        let formattedValue: String
+                        
+                        switch type {
+                        case .total:
+                            value = Double(fetchedMemoryStats.totalMemory)
+                            formattedValue = await formatter.formatBytes(fetchedMemoryStats.totalMemory)
+                        case .free:
+                            value = Double(fetchedMemoryStats.freeMemory)
+                            formattedValue = await formatter.formatBytes(fetchedMemoryStats.freeMemory)
+                        case .active:
+                            value = Double(fetchedMemoryStats.activeMemory)
+                            formattedValue = await formatter.formatBytes(fetchedMemoryStats.activeMemory)
+                        case .wired:
+                            value = Double(fetchedMemoryStats.wiredMemory)
+                            formattedValue = await formatter.formatBytes(fetchedMemoryStats.wiredMemory)
+                        case .used:
+                            value = Double(fetchedMemoryStats.totalUsedMemory)
+                            formattedValue = await formatter.formatBytes(fetchedMemoryStats.totalUsedMemory)
+                        }
+                        
+                        let sensorData = SensorData(
+                            timestamp: now,
+                            sensorName: type.name,
+                            value: value,
+                            category: "Memory"
+                        )
+                        
+                        return (formattedValue, sensorData)
+                    }
+                }
+                
+                var tempFormattedMemoryValues: [String] = []
+                var newMemoryData: [SensorData] = []
+                
+                for await result in group {
+                    tempFormattedMemoryValues.append(result.formattedValue)
+                    newMemoryData.append(result.sensorData)
+                }
+                
+                return (tempFormattedMemoryValues, newMemoryData)
+            }
+            
+            let cpuDataResults = await withTaskGroup(of: (formattedValue: String, sensorData: SensorData).self) { group in
+                for type in CPUMetricType.allCases {
+                    group.addTask {
+                        let value: Double
+                        let formattedValue: String
+                        
+                        switch type {
+                        case .total:
+                            value = fetchedCPUStats.totalUsage
+                            formattedValue = await formatter.formatPercentage(fetchedCPUStats.totalUsage)
+                        case .user:
+                            value = fetchedCPUStats.userUsage
+                            formattedValue = await formatter.formatPercentage(fetchedCPUStats.userUsage)
+                        case .system:
+                            value = fetchedCPUStats.systemUsage
+                            formattedValue = await formatter.formatPercentage(fetchedCPUStats.systemUsage)
+                        }
+                        
+                        let sensorData = SensorData(
+                            timestamp: now,
+                            sensorName: type.name,
+                            value: value,
+                            category: "CPU"
+                        )
+                        
+                        return (formattedValue, sensorData)
+                    }
+                }
+                
+                var tempFormattedCPUValues: [String] = []
+                var newCPUData: [SensorData] = []
+                
+                for await result in group {
+                    tempFormattedCPUValues.append(result.formattedValue)
+                    newCPUData.append(result.sensorData)
+                }
+                
+                return (tempFormattedCPUValues, newCPUData)
+            }
+            
+            let diskDataResults = await withTaskGroup(of: (formattedValue: String, sensorData: SensorData).self) { group in
+                for type in DiskMetricType.allCases {
+                    group.addTask {
+                        let value: Double
+                        let formattedValue: String
+                        
+                        switch type {
+                        case .total:
+                            value = Double(fetchedDiskStats.totalSpace)
+                            formattedValue = await formatter.formatBytes(fetchedDiskStats.totalSpace)
+                        case .used:
+                            value = Double(fetchedDiskStats.usedSpace)
+                            formattedValue = await formatter.formatBytes(fetchedDiskStats.usedSpace)
+                        case .free:
+                            value = Double(fetchedDiskStats.freeSpace)
+                            formattedValue = await formatter.formatBytes(fetchedDiskStats.freeSpace)
+                        }
+                        
+                        let sensorData = SensorData(
+                            timestamp: now,
+                            sensorName: type.name,
+                            value: value,
+                            category: "Disk"
+                        )
+                        
+                        return (formattedValue, sensorData)
+                    }
+                }
+                
+                var tempFormattedDiskValues: [String] = []
+                var newDiskData: [SensorData] = []
+                
+                for await result in group {
+                    tempFormattedDiskValues.append(result.formattedValue)
+                    newDiskData.append(result.sensorData)
+                }
+                
+                return (tempFormattedDiskValues, newDiskData)
+            }
+            
+            let (tempFormattedTemperatures, newThermalData) = thermalDataResults
+            let (tempFormattedVoltages, newVoltageData) = voltageDataResults
+            let (tempFormattedCurrents, newCurrentData) = currentDataResults
+            let (tempFormattedMemoryValues, newMemoryData) = memoryDataResults
+            let (tempFormattedCPUValues, newCPUData) = cpuDataResults
+            let (tempFormattedDiskValues, newDiskData) = diskDataResults
+            
             await MainActor.run {
-                // Update all sensor data
-                thermalSensors = fetchedThermalSensors
-                voltageSensors = fetchedVoltageSensors
-                currentSensors = fetchedCurrentSensors
-                memoryStats = fetchedMemoryStats
-                cpuStats = fetchedCPUStats
-                diskStats = fetchedDiskStats
-                thermalState = fetchedThermalState
-                uptimeText = fetchedUptimeText
+                // Get a reference to self to avoid capturing mutable properties
+                let viewModel = SensorsViewModel.shared
                 
-                // Update formatted values
-                formattedTemperatures = tempFormattedTemperatures
-                formattedVoltages = tempFormattedVoltages
-                formattedCurrents = tempFormattedCurrents
-                formattedMemoryValues = tempFormattedMemoryValues
-                formattedCPUValues = tempFormattedCPUValues
-                formattedDiskValues = tempFormattedDiskValues
+                // Update all sensor data
+                viewModel.thermalSensors = fetchedThermalSensors
+                viewModel.voltageSensors = fetchedVoltageSensors
+                viewModel.currentSensors = fetchedCurrentSensors
+                viewModel.memoryStats = fetchedMemoryStats
+                viewModel.cpuStats = fetchedCPUStats
+                viewModel.diskStats = fetchedDiskStats
+                viewModel.thermalState = fetchedThermalState
+                viewModel.uptimeText = fetchedUptimeText
+                
+                // Update formatted values - all of these are now local immutable values
+                viewModel.formattedTemperatures = tempFormattedTemperatures
+                viewModel.formattedVoltages = tempFormattedVoltages
+                viewModel.formattedCurrents = tempFormattedCurrents
+                viewModel.formattedMemoryValues = tempFormattedMemoryValues
+                viewModel.formattedCPUValues = tempFormattedCPUValues
+                viewModel.formattedDiskValues = tempFormattedDiskValues
                 
                 // Update historical data collections
-                thermalSensorData.append(contentsOf: newThermalData)
-                voltageSensorData.append(contentsOf: newVoltageData)
-                currentSensorData.append(contentsOf: newCurrentData)
-                memoryMetricData.append(contentsOf: newMemoryData)
-                cpuMetricData.append(contentsOf: newCPUData)
-                diskMetricData.append(contentsOf: newDiskData)
+                viewModel.thermalSensorData.append(contentsOf: newThermalData)
+                viewModel.voltageSensorData.append(contentsOf: newVoltageData)
+                viewModel.currentSensorData.append(contentsOf: newCurrentData)
+                viewModel.memoryMetricData.append(contentsOf: newMemoryData)
+                viewModel.cpuMetricData.append(contentsOf: newCPUData)
+                viewModel.diskMetricData.append(contentsOf: newDiskData)
                 
                 // Cap data collections to manage memory (3 hours of data at 1 reading per second)
                 let maxDataPoints = 3 * 60 * 60
-                let maxPointsPerSensor = maxDataPoints / max(1, fetchedThermalSensors.count)
-                let maxPointsPerMetric = maxDataPoints / 5 // For memory metrics (5 metrics)
                 
-                if thermalSensorData.count > maxDataPoints {
-                    thermalSensorData = Array(thermalSensorData.suffix(maxDataPoints))
+                // Cap each data collection
+                if viewModel.thermalSensorData.count > maxDataPoints {
+                    viewModel.thermalSensorData = Array(viewModel.thermalSensorData.suffix(maxDataPoints))
                 }
                 
-                if voltageSensorData.count > maxDataPoints {
-                    voltageSensorData = Array(voltageSensorData.suffix(maxDataPoints))
+                if viewModel.voltageSensorData.count > maxDataPoints {
+                    viewModel.voltageSensorData = Array(viewModel.voltageSensorData.suffix(maxDataPoints))
                 }
                 
-                if currentSensorData.count > maxDataPoints {
-                    currentSensorData = Array(currentSensorData.suffix(maxDataPoints))
+                if viewModel.currentSensorData.count > maxDataPoints {
+                    viewModel.currentSensorData = Array(viewModel.currentSensorData.suffix(maxDataPoints))
                 }
                 
-                if memoryMetricData.count > maxDataPoints {
-                    memoryMetricData = Array(memoryMetricData.suffix(maxDataPoints))
+                if viewModel.memoryMetricData.count > maxDataPoints {
+                    viewModel.memoryMetricData = Array(viewModel.memoryMetricData.suffix(maxDataPoints))
                 }
                 
-                if cpuMetricData.count > maxDataPoints {
-                    cpuMetricData = Array(cpuMetricData.suffix(maxDataPoints))
+                if viewModel.cpuMetricData.count > maxDataPoints {
+                    viewModel.cpuMetricData = Array(viewModel.cpuMetricData.suffix(maxDataPoints))
                 }
                 
-                if diskMetricData.count > maxDataPoints {
-                    diskMetricData = Array(diskMetricData.suffix(maxDataPoints))
+                if viewModel.diskMetricData.count > maxDataPoints {
+                    viewModel.diskMetricData = Array(viewModel.diskMetricData.suffix(maxDataPoints))
                 }
                 
                 // Update timestamp
-                lastUpdateTime = now
+                viewModel.lastUpdateTime = now
             }
         }
     }

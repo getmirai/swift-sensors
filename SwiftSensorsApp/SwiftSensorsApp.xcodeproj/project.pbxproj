@@ -11,7 +11,6 @@
 		184EAEA62D8B8A6B00D460F3 /* PowerSensorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EAE842D8B8A6B00D460F3 /* PowerSensorsView.swift */; };
 		184EAEA92D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */; };
 		35B5FEEF2B18D13000361823 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35B5FEEE2B18D13000361823 /* Assets.xcassets */; };
-		35B5FEF22B18D13000361823 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35B5FEF12B18D13000361823 /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,14 +18,12 @@
 		184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSensorsAppApp.swift; sourceTree = "<group>"; };
 		35B5FEE72B18D12F00361823 /* SwiftSensorsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftSensorsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		35B5FEEE2B18D13000361823 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		35B5FEF12B18D13000361823 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		35B5FF1A2B18D45600361823 /* SwiftSensorsApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftSensorsApp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		184EAE812D8B8A6B00D460F3 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
 		184EAE832D8B8A6B00D460F3 /* Navigation */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Navigation; sourceTree = "<group>"; };
-		184EAE862D8B8A6B00D460F3 /* Preview Content */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Preview Content"; sourceTree = "<group>"; };
 		184EAE8A2D8B8A6B00D460F3 /* Stores */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Stores; sourceTree = "<group>"; };
 		184EAE8D2D8B8A6B00D460F3 /* ViewModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ViewModels; sourceTree = "<group>"; };
 		184EAEA32D8B8A6B00D460F3 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
@@ -66,24 +63,14 @@
 				184EAE812D8B8A6B00D460F3 /* Models */,
 				184EAE832D8B8A6B00D460F3 /* Navigation */,
 				184EAE842D8B8A6B00D460F3 /* PowerSensorsView.swift */,
-				184EAE862D8B8A6B00D460F3 /* Preview Content */,
 				184EAE8A2D8B8A6B00D460F3 /* Stores */,
 				184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */,
 				184EAE8D2D8B8A6B00D460F3 /* ViewModels */,
 				184EAEA32D8B8A6B00D460F3 /* Views */,
 				35B5FF1A2B18D45600361823 /* SwiftSensorsApp.entitlements */,
 				35B5FEEE2B18D13000361823 /* Assets.xcassets */,
-				35B5FEF02B18D13000361823 /* Preview Content */,
 			);
 			path = SwiftSensorsApp;
-			sourceTree = "<group>";
-		};
-		35B5FEF02B18D13000361823 /* Preview Content */ = {
-			isa = PBXGroup;
-			children = (
-				35B5FEF12B18D13000361823 /* Preview Assets.xcassets */,
-			);
-			path = "Preview Content";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -104,7 +91,6 @@
 			fileSystemSynchronizedGroups = (
 				184EAE812D8B8A6B00D460F3 /* Models */,
 				184EAE832D8B8A6B00D460F3 /* Navigation */,
-				184EAE862D8B8A6B00D460F3 /* Preview Content */,
 				184EAE8A2D8B8A6B00D460F3 /* Stores */,
 				184EAE8D2D8B8A6B00D460F3 /* ViewModels */,
 				184EAEA32D8B8A6B00D460F3 /* Views */,
@@ -157,7 +143,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				35B5FEF22B18D13000361823 /* Preview Assets.xcassets in Resources */,
 				35B5FEEF2B18D13000361823 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -304,7 +289,7 @@
 				CODE_SIGN_ENTITLEMENTS = SwiftSensorsApp/SwiftSensorsApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SwiftSensorsApp/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 63TG84TE66;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -335,7 +320,7 @@
 				CODE_SIGN_ENTITLEMENTS = SwiftSensorsApp/SwiftSensorsApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "\"SwiftSensorsApp/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = 63TG84TE66;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

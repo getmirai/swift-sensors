@@ -25,6 +25,7 @@ struct BaseChartView: View {
                         y: .value(yAxisTitle, reading.value)
                     )
                     .foregroundStyle(by: .value("Sensor", reading.sensorName))
+                    .interpolationMethod(.catmullRom) // Smooth curves
                 }
                 .chartXAxis {
                     AxisMarks(position: .bottom)
