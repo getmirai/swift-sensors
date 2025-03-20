@@ -18,10 +18,10 @@ extension EnvironmentValues {
 /// View model for sensor data management
 @Observable
 class SensorsViewModel {
-    // Sensor data
-    var thermalSensors: [ThermalSensor] = []
-    var voltageSensors: [VoltageSensor] = []
-    var currentSensors: [CurrentSensor] = []
+    // Sensor readings
+    var thermalSensorReadings: [ThermalSensorReading] = []
+    var voltageSensorReadings: [VoltageSensorReading] = []
+    var currentSensorReadings: [CurrentSensorReading] = []
     var memoryStats: MemoryStats? = nil
     var cpuStats: CPUStats? = nil
     var diskStats: DiskStats? = nil
@@ -36,19 +36,19 @@ class SensorsViewModel {
     var formattedCPUValues: [String] = []
     var formattedDiskValues: [String] = []
 
-    // Selected sensors for charts
-    var selectedThermalSensors: Set<String> = []
-    var selectedVoltageSensors: Set<String> = []
-    var selectedCurrentSensors: Set<String> = []
+    // Selected readings for charts
+    var selectedThermalReadings: Set<String> = []
+    var selectedVoltageReadings: Set<String> = []
+    var selectedCurrentReadings: Set<String> = []
     var selectedMemoryItems: Set<Int> = []
     var selectedCPUItems: Set<Int> = []
     var selectedDiskItems: Set<Int> = []
     var selectedSystemItem: Int? = nil
 
-    // Historical sensor data for charts
-    var thermalSensorData: [SensorData] = []
-    var voltageSensorData: [SensorData] = []
-    var currentSensorData: [SensorData] = []
+    // Historical reading data for charts
+    var thermalReadingData: [SensorData] = []
+    var voltageReadingData: [SensorData] = []
+    var currentReadingData: [SensorData] = []
     var memoryMetricData: [SensorData] = []
     var cpuMetricData: [SensorData] = []
     var diskMetricData: [SensorData] = []
@@ -72,30 +72,30 @@ class SensorsViewModel {
         }
     }
 
-    /// Get filtered thermal sensor data for specified time window
+    /// Get filtered thermal reading data for specified time window
     func filteredThermalData(timeWindow: TimeInterval) -> [SensorData] {
         let cutoffDate = Date().addingTimeInterval(-timeWindow)
-        return self.thermalSensorData.filter { reading in
+        return self.thermalReadingData.filter { reading in
             reading.timestamp > cutoffDate &&
-                self.selectedThermalSensors.contains(reading.sensorName)
+                self.selectedThermalReadings.contains(reading.sensorName)
         }
     }
 
-    /// Get filtered voltage sensor data for specified time window
+    /// Get filtered voltage reading data for specified time window
     func filteredVoltageData(timeWindow: TimeInterval) -> [SensorData] {
         let cutoffDate = Date().addingTimeInterval(-timeWindow)
-        return self.voltageSensorData.filter { reading in
+        return self.voltageReadingData.filter { reading in
             reading.timestamp > cutoffDate &&
-                self.selectedVoltageSensors.contains(reading.sensorName)
+                self.selectedVoltageReadings.contains(reading.sensorName)
         }
     }
 
-    /// Get filtered current sensor data for specified time window
+    /// Get filtered current reading data for specified time window
     func filteredCurrentData(timeWindow: TimeInterval) -> [SensorData] {
         let cutoffDate = Date().addingTimeInterval(-timeWindow)
-        return self.currentSensorData.filter { reading in
+        return self.currentReadingData.filter { reading in
             reading.timestamp > cutoffDate &&
-                self.selectedCurrentSensors.contains(reading.sensorName)
+                self.selectedCurrentReadings.contains(reading.sensorName)
         }
     }
 
@@ -138,9 +138,9 @@ class SensorsViewModel {
             let sensors = SwiftSensors.shared
 
             // Create temporary variables to hold fetched data
-            let fetchedThermalSensors = await sensors.getThermalSensors()
-            let fetchedVoltageSensors = await sensors.getVoltageSensors()
-            let fetchedCurrentSensors = await sensors.getCurrentSensors()
+            let fetchedThermalSensorReadings = await sensors.getThermalSensorReadings()
+            let fetchedVoltageSensorReadings = await sensors.getVoltageSensorReadings()
+            let fetchedCurrentSensorReadings = await sensors.getCurrentSensorReadings()
             let fetchedMemoryStats = await sensors.getMemoryStats()
             let fetchedCPUStats = await sensors.getCPUStats()
             let fetchedDiskStats = await sensors.getDiskStats()
@@ -149,7 +149,7 @@ class SensorsViewModel {
             let now = Date()
 
             let thermalDataResults = await withTaskGroup(of: (formattedTemp: String, sensorData: SensorData).self) { group in
-                for sensor in fetchedThermalSensors {
+                for sensor in fetchedThermalSensorReadings {
                     group.addTask {
                         let formattedTemp = await formatter.formatTemperature(sensor.temperature)
                         let sensorData = SensorData(
@@ -174,7 +174,7 @@ class SensorsViewModel {
             }
 
             let voltageDataResults = await withTaskGroup(of: (formattedVoltage: String, sensorData: SensorData).self) { group in
-                for sensor in fetchedVoltageSensors {
+                for sensor in fetchedVoltageSensorReadings {
                     group.addTask {
                         let formattedVoltage = await formatter.formatVoltage(sensor.voltage)
                         let sensorData = SensorData(
@@ -199,7 +199,7 @@ class SensorsViewModel {
             }
 
             let currentDataResults = await withTaskGroup(of: (formattedCurrent: String, sensorData: SensorData).self) { group in
-                for sensor in fetchedCurrentSensors {
+                for sensor in fetchedCurrentSensorReadings {
                     group.addTask {
                         let formattedCurrent = await formatter.formatCurrent(sensor.current)
                         let sensorData = SensorData(
@@ -229,7 +229,7 @@ class SensorsViewModel {
                     group.addTask {
                         let value: Double
                         let formattedValue: String
-                        
+
                         switch type {
                         case .total:
                             value = Double(fetchedMemoryStats.totalMemory)
@@ -260,29 +260,29 @@ class SensorsViewModel {
                             value = Double(unavailable)
                             formattedValue = await formatter.formatBytes(unavailable)
                         }
-                        
+
                         let sensorData = SensorData(
                             timestamp: now,
                             sensorName: type.name,
                             value: value,
                             category: "Memory"
                         )
-                        
+
                         // Return the index (enum raw value) along with the data for correct ordering
                         return (type.rawValue, formattedValue, sensorData)
                     }
                 }
-                
+
                 // Prepare arrays with correct capacity
                 var tempFormattedMemoryValues = Array(repeating: "", count: MemoryMetricType.allCases.count)
                 var newMemoryData: [SensorData] = []
-                
+
                 // Collect results and store them in the correct order
                 for await (index, formattedValue, sensorData) in group {
                     tempFormattedMemoryValues[index] = formattedValue
                     newMemoryData.append(sensorData)
                 }
-                
+
                 return (tempFormattedMemoryValues, newMemoryData)
             }
 
@@ -376,10 +376,10 @@ class SensorsViewModel {
             await MainActor.run { [weak self] in
                 guard let self = self else { return }
 
-                // Update all sensor data
-                self.thermalSensors = fetchedThermalSensors
-                self.voltageSensors = fetchedVoltageSensors
-                self.currentSensors = fetchedCurrentSensors
+                // Update all sensor readings
+                self.thermalSensorReadings = fetchedThermalSensorReadings
+                self.voltageSensorReadings = fetchedVoltageSensorReadings
+                self.currentSensorReadings = fetchedCurrentSensorReadings
                 self.memoryStats = fetchedMemoryStats
                 self.cpuStats = fetchedCPUStats
                 self.diskStats = fetchedDiskStats
@@ -395,9 +395,9 @@ class SensorsViewModel {
                 self.formattedDiskValues = tempFormattedDiskValues
 
                 // Update historical data collections
-                self.thermalSensorData.append(contentsOf: newThermalData)
-                self.voltageSensorData.append(contentsOf: newVoltageData)
-                self.currentSensorData.append(contentsOf: newCurrentData)
+                self.thermalReadingData.append(contentsOf: newThermalData)
+                self.voltageReadingData.append(contentsOf: newVoltageData)
+                self.currentReadingData.append(contentsOf: newCurrentData)
                 self.memoryMetricData.append(contentsOf: newMemoryData)
                 self.cpuMetricData.append(contentsOf: newCPUData)
                 self.diskMetricData.append(contentsOf: newDiskData)
@@ -406,16 +406,16 @@ class SensorsViewModel {
                 let maxDataPoints = 3 * 60 * 60
 
                 // Cap each data collection
-                if self.thermalSensorData.count > maxDataPoints {
-                    self.thermalSensorData = Array(self.thermalSensorData.suffix(maxDataPoints))
+                if self.thermalReadingData.count > maxDataPoints {
+                    self.thermalReadingData = Array(self.thermalReadingData.suffix(maxDataPoints))
                 }
 
-                if self.voltageSensorData.count > maxDataPoints {
-                    self.voltageSensorData = Array(self.voltageSensorData.suffix(maxDataPoints))
+                if self.voltageReadingData.count > maxDataPoints {
+                    self.voltageReadingData = Array(self.voltageReadingData.suffix(maxDataPoints))
                 }
 
-                if self.currentSensorData.count > maxDataPoints {
-                    self.currentSensorData = Array(self.currentSensorData.suffix(maxDataPoints))
+                if self.currentReadingData.count > maxDataPoints {
+                    self.currentReadingData = Array(self.currentReadingData.suffix(maxDataPoints))
                 }
 
                 if self.memoryMetricData.count > maxDataPoints {

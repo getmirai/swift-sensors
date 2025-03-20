@@ -78,8 +78,8 @@ struct SectionDetailView: View {
     private var chartForSection: some View {
         switch self.section {
         case .thermal:
-            if self.viewModel.selectedThermalSensors.isEmpty {
-                Text("Select sensors to view in chart")
+            if self.viewModel.selectedThermalReadings.isEmpty {
+                Text("Select readings to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
@@ -91,8 +91,8 @@ struct SectionDetailView: View {
             }
 
         case .voltage:
-            if self.viewModel.selectedVoltageSensors.isEmpty {
-                Text("Select sensors to view in chart")
+            if self.viewModel.selectedVoltageReadings.isEmpty {
+                Text("Select readings to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
@@ -104,8 +104,8 @@ struct SectionDetailView: View {
             }
 
         case .current:
-            if self.viewModel.selectedCurrentSensors.isEmpty {
-                Text("Select sensors to view in chart")
+            if self.viewModel.selectedCurrentReadings.isEmpty {
+                Text("Select readings to view in chart")
                     .foregroundColor(.gray)
                     .italic()
                     .onAppear {
@@ -166,19 +166,19 @@ struct SectionDetailView: View {
     private var sectionContent: some View {
         switch self.section {
         case .thermal:
-            ForEach(self.viewModel.thermalSensors, id: \.id) { sensor in
-                let isSelected = self.viewModel.selectedThermalSensors.contains(sensor.name)
+            ForEach(self.viewModel.thermalSensorReadings, id: \.id) { sensor in
+                let isSelected = self.viewModel.selectedThermalReadings.contains(sensor.name)
                 Button {
                     if isSelected {
-                        self.viewModel.selectedThermalSensors.remove(sensor.name)
+                        self.viewModel.selectedThermalReadings.remove(sensor.name)
                     } else {
-                        self.viewModel.selectedThermalSensors.insert(sensor.name)
+                        self.viewModel.selectedThermalReadings.insert(sensor.name)
                     }
                 } label: {
                     HStack {
                         Text(sensor.name)
                         Spacer()
-                        Text(self.viewModel.thermalSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
+                        Text(self.viewModel.thermalSensorReadings.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
                             idx < self.viewModel.formattedTemperatures.count ? self.viewModel.formattedTemperatures[idx] : nil
                         } ?? "\(sensor.temperature) °C")
 
@@ -192,19 +192,19 @@ struct SectionDetailView: View {
             }
 
         case .voltage:
-            ForEach(self.viewModel.voltageSensors, id: \.id) { sensor in
-                let isSelected = self.viewModel.selectedVoltageSensors.contains(sensor.name)
+            ForEach(self.viewModel.voltageSensorReadings, id: \.id) { sensor in
+                let isSelected = self.viewModel.selectedVoltageReadings.contains(sensor.name)
                 Button {
                     if isSelected {
-                        self.viewModel.selectedVoltageSensors.remove(sensor.name)
+                        self.viewModel.selectedVoltageReadings.remove(sensor.name)
                     } else {
-                        self.viewModel.selectedVoltageSensors.insert(sensor.name)
+                        self.viewModel.selectedVoltageReadings.insert(sensor.name)
                     }
                 } label: {
                     HStack {
                         Text(sensor.name)
                         Spacer()
-                        Text(self.viewModel.voltageSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
+                        Text(self.viewModel.voltageSensorReadings.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
                             idx < self.viewModel.formattedVoltages.count ? self.viewModel.formattedVoltages[idx] : nil
                         } ?? "\(sensor.voltage) V")
 
@@ -218,19 +218,19 @@ struct SectionDetailView: View {
             }
 
         case .current:
-            ForEach(self.viewModel.currentSensors, id: \.id) { sensor in
-                let isSelected = self.viewModel.selectedCurrentSensors.contains(sensor.name)
+            ForEach(self.viewModel.currentSensorReadings, id: \.id) { sensor in
+                let isSelected = self.viewModel.selectedCurrentReadings.contains(sensor.name)
                 Button {
                     if isSelected {
-                        self.viewModel.selectedCurrentSensors.remove(sensor.name)
+                        self.viewModel.selectedCurrentReadings.remove(sensor.name)
                     } else {
-                        self.viewModel.selectedCurrentSensors.insert(sensor.name)
+                        self.viewModel.selectedCurrentReadings.insert(sensor.name)
                     }
                 } label: {
                     HStack {
                         Text(sensor.name)
                         Spacer()
-                        Text(self.viewModel.currentSensors.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
+                        Text(self.viewModel.currentSensorReadings.firstIndex(where: { $0.id == sensor.id }).flatMap { idx in
                             idx < self.viewModel.formattedCurrents.count ? self.viewModel.formattedCurrents[idx] : nil
                         } ?? "\(sensor.current) A")
 
@@ -245,22 +245,20 @@ struct SectionDetailView: View {
 
         case .memory:
             if self.viewModel.memoryStats != nil {
-                let labels = ["Total Physical", "Free", "Active", "Inactive", "Wired", "Compressed", "Sum", "Available to App", "Unavailable Remainder"]
-
-                ForEach(0..<labels.count, id: \.self) { index in
-                    let isSelected = self.viewModel.selectedMemoryItems.contains(index)
+                ForEach(MemoryMetricType.allCases, id: \.self) { metricType in
+                    let isSelected = self.viewModel.selectedMemoryItems.contains(metricType.rawValue)
                     Button {
                         if isSelected {
-                            self.viewModel.selectedMemoryItems.remove(index)
+                            self.viewModel.selectedMemoryItems.remove(metricType.rawValue)
                         } else {
-                            self.viewModel.selectedMemoryItems.insert(index)
+                            self.viewModel.selectedMemoryItems.insert(metricType.rawValue)
                         }
                     } label: {
                         HStack {
-                            Text(labels[index])
+                            Text(metricType.name)
                             Spacer()
-                            if index < self.viewModel.formattedMemoryValues.count {
-                                Text(self.viewModel.formattedMemoryValues[index])
+                            if metricType.rawValue < self.viewModel.formattedMemoryValues.count {
+                                Text(self.viewModel.formattedMemoryValues[metricType.rawValue])
                             }
 
                             if isSelected {
@@ -279,22 +277,20 @@ struct SectionDetailView: View {
 
         case .cpu:
             if self.viewModel.cpuStats != nil {
-                let labels = ["Total Usage", "User Usage", "System Usage"]
-
-                ForEach(0..<labels.count, id: \.self) { index in
-                    let isSelected = self.viewModel.selectedCPUItems.contains(index)
+                ForEach(CPUMetricType.allCases, id: \.self) { metricType in
+                    let isSelected = self.viewModel.selectedCPUItems.contains(metricType.rawValue)
                     Button {
                         if isSelected {
-                            self.viewModel.selectedCPUItems.remove(index)
+                            self.viewModel.selectedCPUItems.remove(metricType.rawValue)
                         } else {
-                            self.viewModel.selectedCPUItems.insert(index)
+                            self.viewModel.selectedCPUItems.insert(metricType.rawValue)
                         }
                     } label: {
                         HStack {
-                            Text(labels[index])
+                            Text(metricType.name)
                             Spacer()
-                            if index < self.viewModel.formattedCPUValues.count {
-                                Text(self.viewModel.formattedCPUValues[index])
+                            if metricType.rawValue < self.viewModel.formattedCPUValues.count {
+                                Text(self.viewModel.formattedCPUValues[metricType.rawValue])
                             }
 
                             if isSelected {
@@ -313,22 +309,20 @@ struct SectionDetailView: View {
 
         case .disk:
             if self.viewModel.diskStats != nil {
-                let labels = ["Total Space", "Used Space", "Free Space"]
-
-                ForEach(0..<labels.count, id: \.self) { index in
-                    let isSelected = self.viewModel.selectedDiskItems.contains(index)
+                ForEach(DiskMetricType.allCases, id: \.self) { metricType in
+                    let isSelected = self.viewModel.selectedDiskItems.contains(metricType.rawValue)
                     Button {
                         if isSelected {
-                            self.viewModel.selectedDiskItems.remove(index)
+                            self.viewModel.selectedDiskItems.remove(metricType.rawValue)
                         } else {
-                            self.viewModel.selectedDiskItems.insert(index)
+                            self.viewModel.selectedDiskItems.insert(metricType.rawValue)
                         }
                     } label: {
                         HStack {
-                            Text(labels[index])
+                            Text(metricType.name)
                             Spacer()
-                            if index < self.viewModel.formattedDiskValues.count {
-                                Text(self.viewModel.formattedDiskValues[index])
+                            if metricType.rawValue < self.viewModel.formattedDiskValues.count {
+                                Text(self.viewModel.formattedDiskValues[metricType.rawValue])
                             }
 
                             if isSelected {

@@ -5,7 +5,7 @@ import PrivateAPI
 /// A struct representing a thermal sensor in the device.
 ///
 /// Thermal sensors measure temperature at various points in the device.
-/// These measurements are useful for monitoring device health and detecting 
+/// These measurements are useful for monitoring device health and detecting
 /// potential overheating issues.
 ///
 /// Example usage:
@@ -16,7 +16,7 @@ import PrivateAPI
 /// }
 /// ```
 
-public struct ThermalSensor: BaseSensor {
+public struct ThermalSensorReading: BaseSensorReading {
     /// Unique identifier for the sensor
     public let id: String
     /// The name of the sensor
@@ -34,7 +34,7 @@ public struct ThermalSensor: BaseSensor {
 /// A manager actor for thermal sensors
 
 public actor ThermalSensorManager: SensorManager {
-    public typealias SensorType = ThermalSensor
+    public typealias SensorType = ThermalSensorReading
 
     /// Shared instance for easy access
     public static let shared = ThermalSensorManager()
@@ -52,7 +52,7 @@ public actor ThermalSensorManager: SensorManager {
     private init() {}
 
     /// Get all available thermal sensors with current temperature readings
-    public func getAllSensors() async -> [ThermalSensor] {
+    public func getAllSensors() async -> [ThermalSensorReading] {
         let entries = SensorUtils.getEntries(matching: self.temperatureQuery)
 
         let nameDict = SensorUtils.createNameDictionary(of: entries) { client in
@@ -65,13 +65,13 @@ public actor ThermalSensorManager: SensorManager {
 
         // Create sensors and sort them by name for consistency
         let sensors = temps.map { name, temp in
-            ThermalSensor(name: name, temperature: temp)
+            ThermalSensorReading(name: name, temperature: temp)
         }
         return sensors.sorted { $0.name < $1.name }
     }
 
     // Legacy method for backward compatibility
-    public func getAllThermalSensors() async -> [ThermalSensor] {
+    public func getAllThermalSensors() async -> [ThermalSensorReading] {
         await self.getAllSensors()
     }
 }

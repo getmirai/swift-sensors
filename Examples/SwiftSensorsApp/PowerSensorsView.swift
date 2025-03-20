@@ -131,7 +131,7 @@ struct PowerSensorsView: View {
 
             // Create new data points
             if self.currentTab == .voltage || self.availableSensors.isEmpty {
-                let voltageSensors = await swiftSensors.getVoltageSensors()
+                let voltageSensors = await swiftSensors.getVoltageSensorReadings()
 
                 // Add voltage data
                 let voltageData = voltageSensors.map { sensor in
@@ -156,7 +156,7 @@ struct PowerSensorsView: View {
             }
 
             if self.currentTab == .current || self.availableSensors.isEmpty {
-                let currentSensors = await swiftSensors.getCurrentSensors()
+                let currentSensors = await swiftSensors.getCurrentSensorReadings()
 
                 // Add current data
                 let currentData = currentSensors.map { sensor in

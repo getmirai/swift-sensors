@@ -9,7 +9,7 @@ public enum PowerSensorType: Sendable {
 }
 
 /// A struct representing a voltage sensor
-public struct VoltageSensor: BaseSensor {
+public struct VoltageSensorReading: BaseSensorReading {
     /// Unique identifier for the sensor
     public let id: String
     /// The name of the sensor
@@ -25,7 +25,7 @@ public struct VoltageSensor: BaseSensor {
 }
 
 /// A struct representing a current sensor
-public struct CurrentSensor: BaseSensor {
+public struct CurrentSensorReading: BaseSensorReading {
     /// Unique identifier for the sensor
     public let id: String
     /// The name of the sensor
@@ -41,7 +41,7 @@ public struct CurrentSensor: BaseSensor {
 }
 
 /// A struct for representing any power sensor
-public struct PowerSensor: BaseSensor {
+public struct PowerSensorReading: BaseSensorReading {
     /// Unique identifier for the sensor
     public let id: String
     /// The name of the sensor
@@ -71,7 +71,7 @@ public struct PowerSensor: BaseSensor {
 
 /// A manager actor for power sensors (voltage and current)
 public actor PowerSensorManager: SensorManager {
-    public typealias SensorType = PowerSensor
+    public typealias SensorType = PowerSensorReading
 
     /// Shared instance for easy access
     public static let shared = PowerSensorManager()
@@ -94,7 +94,7 @@ public actor PowerSensorManager: SensorManager {
     private init() {}
 
     /// Get all available power sensors (both voltage and current)
-    public func getAllSensors() async -> [PowerSensor] {
+    public func getAllSensors() async -> [PowerSensorReading] {
         let voltageSensors = await getSpecificSensors(
             query: voltageQuery,
             type: .voltage
@@ -110,7 +110,7 @@ public actor PowerSensorManager: SensorManager {
     }
 
     /// Helper method to get sensors of a specific type
-    private func getSpecificSensors(query: CFDictionary, type: PowerSensorType) async -> [PowerSensor] {
+    private func getSpecificSensors(query: CFDictionary, type: PowerSensorType) async -> [PowerSensorReading] {
         let entries = SensorUtils.getEntries(matching: query)
 
         let nameDict = SensorUtils.createNameDictionary(of: entries) { client in
@@ -122,14 +122,14 @@ public actor PowerSensorManager: SensorManager {
         }
 
         return values.map { name, value in
-            PowerSensor(name: name, type: type, value: value)
+            PowerSensorReading(name: name, type: type, value: value)
         }
     }
 
     // Legacy methods for backward compatibility
 
     /// Get all available voltage sensors with current voltage readings
-    public func getAllVoltageSensors() async -> [VoltageSensor] {
+    public func getAllVoltageSensors() async -> [VoltageSensorReading] {
         let entries = SensorUtils.getEntries(matching: self.voltageQuery)
 
         let nameDict = SensorUtils.createNameDictionary(of: entries) { client in
@@ -141,13 +141,13 @@ public actor PowerSensorManager: SensorManager {
         }
 
         let sensors = voltages.map { name, voltage in
-            VoltageSensor(name: name, voltage: voltage)
+            VoltageSensorReading(name: name, voltage: voltage)
         }
         return sensors.sorted { $0.name < $1.name }
     }
 
     /// Get all available current sensors with current amperage readings
-    public func getAllCurrentSensors() async -> [CurrentSensor] {
+    public func getAllCurrentSensors() async -> [CurrentSensorReading] {
         let entries = SensorUtils.getEntries(matching: self.currentQuery)
 
         let nameDict = SensorUtils.createNameDictionary(of: entries) { client in
@@ -159,7 +159,7 @@ public actor PowerSensorManager: SensorManager {
         }
 
         let sensors = currents.map { name, current in
-            CurrentSensor(name: name, current: current)
+            CurrentSensorReading(name: name, current: current)
         }
         return sensors.sorted { $0.name < $1.name }
     }

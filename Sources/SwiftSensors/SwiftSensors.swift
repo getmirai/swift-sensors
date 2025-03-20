@@ -2,7 +2,7 @@ import Foundation
 
 /// The main actor for accessing all sensor data in a device.
 ///
-/// This actor provides a centralized interface for accessing various device sensors 
+/// This actor provides a centralized interface for accessing various device sensors
 /// and system information. It uses dedicated manager actors for each category of sensors
 /// to ensure thread safety and data consistency.
 ///
@@ -45,37 +45,37 @@ public actor SwiftSensors {
 
     // MARK: - Thermal Sensors
 
-    /// Get all available thermal sensors
-    /// - Returns: An array of thermal sensors
-    public func getThermalSensors() async -> [ThermalSensor] {
+    /// Get all available thermal sensor readings
+    /// - Returns: An array of thermal sensor readings
+    public func getThermalSensorReadings() async -> [ThermalSensorReading] {
         await self.thermalSensorManager.getAllSensors()
     }
 
     // MARK: - Power Sensors
 
-    /// Get all power sensors (both voltage and current)
-    /// - Returns: An array of power sensors
-    public func getPowerSensors() async -> [PowerSensor] {
+    /// Get all power sensor readings (both voltage and current)
+    /// - Returns: An array of power sensor readings
+    public func getPowerSensorReadings() async -> [PowerSensorReading] {
         await self.powerSensorManager.getAllSensors()
     }
 
-    /// Get all available voltage sensors
-    /// - Returns: An array of voltage sensors
-    public func getVoltageSensors() async -> [VoltageSensor] {
+    /// Get all available voltage sensor readings
+    /// - Returns: An array of voltage sensor readings
+    public func getVoltageSensorReadings() async -> [VoltageSensorReading] {
         await self.powerSensorManager.getAllVoltageSensors()
     }
 
-    /// Get all available current sensors
-    /// - Returns: An array of current sensors
-    public func getCurrentSensors() async -> [CurrentSensor] {
+    /// Get all available current sensor readings
+    /// - Returns: An array of current sensor readings
+    public func getCurrentSensorReadings() async -> [CurrentSensorReading] {
         await self.powerSensorManager.getAllCurrentSensors()
     }
 
-    /// Get power sensors of a specific type
-    /// - Parameter type: The type of power sensors to retrieve
-    /// - Returns: An array of power sensors of the requested type
-    public func getPowerSensors(type: PowerSensorType) async -> [PowerSensor] {
-        let allSensors = await getPowerSensors()
+    /// Get power sensor readings of a specific type
+    /// - Parameter type: The type of power sensor readings to retrieve
+    /// - Returns: An array of power sensor readings of the requested type
+    public func getPowerSensorReadings(type: PowerSensorType) async -> [PowerSensorReading] {
+        let allSensors = await getPowerSensorReadings()
         return allSensors.filter { $0.type == type }
     }
 

@@ -58,7 +58,7 @@ struct SensorDetailView: View {
             self.viewModel.updateIfNeeded()
 
             // Find our sensor by name - this will use the cached data
-            guard let sensor = viewModel.thermalSensors.first(where: { $0.name == sensorName }) else {
+            guard let sensor = viewModel.thermalSensorReadings.first(where: { $0.name == sensorName }) else {
                 print("Sensor not found: \(self.sensorName)")
                 return
             }

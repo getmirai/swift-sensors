@@ -12,7 +12,10 @@ struct ThermalSensorsSection: View {
 
     var body: some View {
         Section(header: Text("Thermal Sensors")) {
-            ForEach(Array(zip(self.viewModel.thermalSensors.indices, self.viewModel.thermalSensors)), id: \.1.id) { index, sensor in
+            ForEach(
+                Array(zip(self.viewModel.thermalSensorReadings.indices, self.viewModel.thermalSensorReadings)),
+                id: \.1.id
+            ) { index, sensor in
                 Button {
                     self.onSensorSelected(sensor.name)
                 } label: {
@@ -25,7 +28,7 @@ struct ThermalSensorsSection: View {
                 .foregroundColor(.primary)
             }
 
-            if self.viewModel.thermalSensors.isEmpty {
+            if self.viewModel.thermalSensorReadings.isEmpty {
                 Text("No thermal sensors found")
                     .foregroundColor(.gray)
                     .italic()

@@ -9,10 +9,10 @@ struct SensorChartView: View {
     var body: some View {
         VStack {
             // Use a compatibility wrapper for the MultiSensorChart
-            if !self.viewModel.selectedThermalSensors.isEmpty {
+            if !self.viewModel.selectedThermalReadings.isEmpty {
                 MultiSensorChart()
             } else {
-                Text("Select sensors on the Thermal Sensors screen to view chart data")
+                Text("Select readings on the Thermal Readings screen to view chart data")
                     .foregroundColor(.gray)
                     .padding()
                     .multilineTextAlignment(.center)

@@ -9,14 +9,17 @@ struct VoltageSensorsSection: View {
 
     var body: some View {
         Section(header: Text("Voltage Sensors")) {
-            ForEach(Array(zip(self.viewModel.voltageSensors.indices, self.viewModel.voltageSensors)), id: \.1.id) { index, sensor in
+            ForEach(
+                Array(zip(self.viewModel.voltageSensorReadings.indices, self.viewModel.voltageSensorReadings)),
+                id: \.1.id
+            ) { index, sensor in
                 InfoRow(
                     label: sensor.name,
                     value: index < self.viewModel.formattedVoltages.count ? self.viewModel.formattedVoltages[index] : "\(sensor.voltage) V"
                 )
             }
 
-            if self.viewModel.voltageSensors.isEmpty {
+            if self.viewModel.voltageSensorReadings.isEmpty {
                 Text("No voltage sensors found")
                     .foregroundColor(.gray)
                     .italic()

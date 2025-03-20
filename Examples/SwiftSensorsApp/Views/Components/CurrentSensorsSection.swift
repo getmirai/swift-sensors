@@ -9,14 +9,17 @@ struct CurrentSensorsSection: View {
 
     var body: some View {
         Section(header: Text("Current Sensors")) {
-            ForEach(Array(zip(self.viewModel.currentSensors.indices, self.viewModel.currentSensors)), id: \.1.id) { index, sensor in
+            ForEach(
+                Array(zip(self.viewModel.currentSensorReadings.indices, self.viewModel.currentSensorReadings)),
+                id: \.1.id
+            ) { index, sensor in
                 InfoRow(
                     label: sensor.name,
                     value: index < self.viewModel.formattedCurrents.count ? self.viewModel.formattedCurrents[index] : "\(sensor.current) A"
                 )
             }
 
-            if self.viewModel.currentSensors.isEmpty {
+            if self.viewModel.currentSensorReadings.isEmpty {
                 Text("No current sensors found")
                     .foregroundColor(.gray)
                     .italic()
