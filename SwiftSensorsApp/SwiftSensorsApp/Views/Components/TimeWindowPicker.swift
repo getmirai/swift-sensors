@@ -1,7 +1,6 @@
 import SwiftUI
 
 /// UI for selecting time window for charts
-
 struct TimeWindowPicker: View {
     /// The selected time window
     @Binding var timeWindow: TimeInterval
@@ -13,6 +12,6 @@ struct TimeWindowPicker: View {
             Text("15 minutes").tag(TimeInterval(15 * 60))
         }
         .pickerStyle(SegmentedPickerStyle())
-        .padding()
+        .padding(.top, 8)
     }
 }

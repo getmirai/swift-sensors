@@ -10,11 +10,7 @@ struct SensorChartView: View {
         VStack {
             // Use a compatibility wrapper for the MultiSensorChart
             if !viewModel.selectedThermalSensors.isEmpty {
-                MultiSensorChart(
-                    sensors: viewModel.thermalSensors.filter { 
-                        viewModel.selectedThermalSensors.contains($0.name)
-                    }
-                )
+                MultiSensorChart()
             } else {
                 Text("Select sensors on the Thermal Sensors screen to view chart data")
                     .foregroundColor(.gray)

@@ -86,12 +86,12 @@ struct SectionDetailView: View {
                 Text("Select sensors to view in chart")
                     .foregroundColor(.gray)
                     .italic()
-            } else {
-                MultiSensorChart(
-                    sensors: viewModel.thermalSensors.filter { 
-                        viewModel.selectedThermalSensors.contains($0.name)
+                    .onAppear {
+                        // Ensure data is collected even when nothing is selected
+                        viewModel.updateIfNeeded()
                     }
-                )
+            } else {
+                MultiSensorChart()
             }
             
         case .voltage:
@@ -99,12 +99,12 @@ struct SectionDetailView: View {
                 Text("Select sensors to view in chart")
                     .foregroundColor(.gray)
                     .italic()
-            } else {
-                VoltageChart(
-                    sensors: viewModel.voltageSensors.filter { 
-                        viewModel.selectedVoltageSensors.contains($0.name)
+                    .onAppear {
+                        // Ensure data is collected even when nothing is selected
+                        viewModel.updateIfNeeded()
                     }
-                )
+            } else {
+                VoltageChart()
             }
             
         case .current:
@@ -112,12 +112,12 @@ struct SectionDetailView: View {
                 Text("Select sensors to view in chart")
                     .foregroundColor(.gray)
                     .italic()
-            } else {
-                CurrentChart(
-                    sensors: viewModel.currentSensors.filter { 
-                        viewModel.selectedCurrentSensors.contains($0.name)
+                    .onAppear {
+                        // Ensure data is collected even when nothing is selected
+                        viewModel.updateIfNeeded()
                     }
-                )
+            } else {
+                CurrentChart()
             }
             
         case .memory:
@@ -125,8 +125,12 @@ struct SectionDetailView: View {
                 Text("Select memory metrics to view in chart")
                     .foregroundColor(.gray)
                     .italic()
+                    .onAppear {
+                        // Ensure data is collected even when nothing is selected
+                        viewModel.updateIfNeeded()
+                    }
             } else {
-                MemoryChart(selectedItems: viewModel.selectedMemoryItems)
+                MemoryChart()
             }
             
         case .cpu:
@@ -134,8 +138,12 @@ struct SectionDetailView: View {
                 Text("Select CPU metrics to view in chart")
                     .foregroundColor(.gray)
                     .italic()
+                    .onAppear {
+                        // Ensure data is collected even when nothing is selected
+                        viewModel.updateIfNeeded()
+                    }
             } else {
-                CPUChart(selectedItems: viewModel.selectedCPUItems)
+                CPUChart()
             }
             
         case .disk:
@@ -143,8 +151,12 @@ struct SectionDetailView: View {
                 Text("Select disk metrics to view in chart")
                     .foregroundColor(.gray)
                     .italic()
+                    .onAppear {
+                        // Ensure data is collected even when nothing is selected
+                        viewModel.updateIfNeeded()
+                    }
             } else {
-                DiskChart(selectedItems: viewModel.selectedDiskItems)
+                DiskChart()
             }
             
         case .system:
