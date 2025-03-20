@@ -7,26 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		184EAC6E2D8B34B100D460F3 /* SwiftSensors in Frameworks */ = {isa = PBXBuildFile; productRef = 184EAC6D2D8B34B100D460F3 /* SwiftSensors */; };
-		184EAEA62D8B8A6B00D460F3 /* PowerSensorsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EAE842D8B8A6B00D460F3 /* PowerSensorsView.swift */; };
-		184EAEA92D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */; };
-		35B5FEEF2B18D13000361823 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 35B5FEEE2B18D13000361823 /* Assets.xcassets */; };
+		18605E442D8C4F980024B6CF /* SwiftSensors in Frameworks */ = {isa = PBXBuildFile; productRef = 18605E432D8C4F980024B6CF /* SwiftSensors */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		184EAE842D8B8A6B00D460F3 /* PowerSensorsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerSensorsView.swift; sourceTree = "<group>"; };
-		184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSensorsAppApp.swift; sourceTree = "<group>"; };
 		35B5FEE72B18D12F00361823 /* SwiftSensorsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftSensorsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		35B5FEEE2B18D13000361823 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		35B5FF1A2B18D45600361823 /* SwiftSensorsApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftSensorsApp.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		184EAE812D8B8A6B00D460F3 /* Models */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Models; sourceTree = "<group>"; };
-		184EAE832D8B8A6B00D460F3 /* Navigation */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Navigation; sourceTree = "<group>"; };
-		184EAE8A2D8B8A6B00D460F3 /* Stores */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Stores; sourceTree = "<group>"; };
-		184EAE8D2D8B8A6B00D460F3 /* ViewModels */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ViewModels; sourceTree = "<group>"; };
-		184EAEA32D8B8A6B00D460F3 /* Views */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Views; sourceTree = "<group>"; };
+		18605E692D8C4FAD0024B6CF /* SwiftSensorsApp */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SwiftSensorsApp; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,7 +23,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				184EAC6E2D8B34B100D460F3 /* SwiftSensors in Frameworks */,
+				18605E442D8C4F980024B6CF /* SwiftSensors in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -44,7 +33,7 @@
 		35B5FEDE2B18D12F00361823 = {
 			isa = PBXGroup;
 			children = (
-				35B5FEE92B18D12F00361823 /* SwiftSensorsApp */,
+				18605E692D8C4FAD0024B6CF /* SwiftSensorsApp */,
 				35B5FEE82B18D12F00361823 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -55,22 +44,6 @@
 				35B5FEE72B18D12F00361823 /* SwiftSensorsApp.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		35B5FEE92B18D12F00361823 /* SwiftSensorsApp */ = {
-			isa = PBXGroup;
-			children = (
-				184EAE812D8B8A6B00D460F3 /* Models */,
-				184EAE832D8B8A6B00D460F3 /* Navigation */,
-				184EAE842D8B8A6B00D460F3 /* PowerSensorsView.swift */,
-				184EAE8A2D8B8A6B00D460F3 /* Stores */,
-				184EAE8B2D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift */,
-				184EAE8D2D8B8A6B00D460F3 /* ViewModels */,
-				184EAEA32D8B8A6B00D460F3 /* Views */,
-				35B5FF1A2B18D45600361823 /* SwiftSensorsApp.entitlements */,
-				35B5FEEE2B18D13000361823 /* Assets.xcassets */,
-			);
-			path = SwiftSensorsApp;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -89,15 +62,11 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				184EAE812D8B8A6B00D460F3 /* Models */,
-				184EAE832D8B8A6B00D460F3 /* Navigation */,
-				184EAE8A2D8B8A6B00D460F3 /* Stores */,
-				184EAE8D2D8B8A6B00D460F3 /* ViewModels */,
-				184EAEA32D8B8A6B00D460F3 /* Views */,
+				18605E692D8C4FAD0024B6CF /* SwiftSensorsApp */,
 			);
 			name = SwiftSensorsApp;
 			packageProductDependencies = (
-				184EAC6D2D8B34B100D460F3 /* SwiftSensors */,
+				18605E432D8C4F980024B6CF /* SwiftSensors */,
 			);
 			productName = SwiftSensorsApp;
 			productReference = 35B5FEE72B18D12F00361823 /* SwiftSensorsApp.app */;
@@ -128,6 +97,7 @@
 			);
 			mainGroup = 35B5FEDE2B18D12F00361823;
 			packageReferences = (
+				18605E422D8C4F980024B6CF /* XCLocalSwiftPackageReference "../../swift-sensors" */,
 			);
 			productRefGroup = 35B5FEE82B18D12F00361823 /* Products */;
 			projectDirPath = "";
@@ -143,7 +113,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				35B5FEEF2B18D13000361823 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,8 +123,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				184EAEA62D8B8A6B00D460F3 /* PowerSensorsView.swift in Sources */,
-				184EAEA92D8B8A6B00D460F3 /* SwiftSensorsAppApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -306,6 +273,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.SwiftSensorsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -337,6 +308,10 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.SwiftSensorsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -366,8 +341,15 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		18605E422D8C4F980024B6CF /* XCLocalSwiftPackageReference "../../swift-sensors" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../../swift-sensors";
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
-		184EAC6D2D8B34B100D460F3 /* SwiftSensors */ = {
+		18605E432D8C4F980024B6CF /* SwiftSensors */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SwiftSensors;
 		};

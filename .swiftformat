@@ -1,0 +1,53 @@
+--swiftversion 6.0
+# format
+--allman false
+--indent 4
+--maxwidth 120
+# options
+--self insert # redundantSelf
+--importgrouping testable-bottom # sortImports
+--trimwhitespace always
+--indentcase false
+--ifdef no-indent #indent
+--wraparguments before-first # wrapArguments
+--wrapparameters before-first # wrapArguments
+--wrapcollections before-first # wrapCollections
+--commas inline
+--elseposition same-line
+--guardelse next-line
+# --closingparen balanced # wrapArguments
+--funcattributes prev-line # wrapAttributes
+--typeattributes prev-line # wrapAttributes
+# rules
+--rules todos, \
+        anyObjectProtocol, \
+        redundantParens, \
+        redundantReturn, \
+        redundantSelf, \
+        sortImports, \
+        strongifiedSelf, \
+        trailingCommas, \
+        trailingSpace, \
+        wrapArguments, \
+        wrapMultilineStatementBraces, \
+        indent, \
+        wrapAttributes, \
+        void, \
+        fileHeader, \
+        trailingclosures, \
+        andOperator, \
+        assertionFailures, \
+        blankLinesAroundMark, \
+        blankLinesAtEndOfScope, \
+        blankLinesAtStartOfScope, \
+        blankLinesBetweenImports, \
+        blankLinesBetweenScopes, \
+        preferKeyPath, \
+        redundantBreak, \
+        redundantClosure, \
+        redundantExtensionACL, \
+        elseOnSameLine
+--exclude **/*Generated.swift
+--exclude **/*.metal.swift
+--exclude **/*.grpc.swift
+--header strip

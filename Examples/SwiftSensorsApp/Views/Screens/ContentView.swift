@@ -58,12 +58,9 @@ struct SectionDetailView: View {
     
     var body: some View {
         VStack {
-            // Dynamic chart at the top based on selection state
             chartForSection
                 .frame(height: 220)
                 .padding()
-            
-            // List of sensors/details below the chart
             List {
                 sectionContent
             }
@@ -77,7 +74,6 @@ struct SectionDetailView: View {
         }
     }
     
-    // Dynamic chart based on section type and selections
     @ViewBuilder
     private var chartForSection: some View {
         switch section {
@@ -166,7 +162,6 @@ struct SectionDetailView: View {
         }
     }
     
-    // Dynamic list content based on section type
     @ViewBuilder
     private var sectionContent: some View {
         switch section {

@@ -11,11 +11,7 @@ let package = Package(
         .library(
             name: "SwiftSensors",
             targets: ["SwiftSensors"]
-        ),
-        .library(
-            name: "PrivateAPI",
-            targets: ["PrivateAPI"]
-        ),
+        )
     ],
     dependencies: [
     ],
